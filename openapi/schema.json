@@ -1,0 +1,1764 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The Health Check is successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {},
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The Health Check is not successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "error"
+                    },
+                    "info": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "error": {
+                      "type": "object",
+                      "example": {
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      },
+                      "nullable": true
+                    },
+                    "details": {
+                      "type": "object",
+                      "example": {
+                        "database": {
+                          "status": "up"
+                        },
+                        "redis": {
+                          "status": "down",
+                          "message": "Could not connect"
+                        }
+                      },
+                      "additionalProperties": {
+                        "type": "object",
+                        "required": [
+                          "status"
+                        ],
+                        "properties": {
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Liveness/readiness: proceso + conexión a la BD",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "AuthController_login_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Iniciar sesión (rate limit por IP)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthTokensDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Renovar tokens (el refresh token usado queda revocado)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cerrar sesión (revoca el refresh token)",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "operationId": "AuthController_me_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthUserDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Perfil, rol y permisos vigentes del usuario",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/users": {
+      "post": {
+        "operationId": "UsersController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear usuario (corrige B1: ya no es público)",
+        "tags": [
+          "users"
+        ]
+      },
+      "get": {
+        "operationId": "UsersController_findAll_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Página (desde 1)",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "Tamaño de página",
+            "schema": {
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por nombre, apellido o username (contiene)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar usuarios (paginado, sin contraseñas)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/me/password": {
+      "patch": {
+        "operationId": "UsersController_changeMyPassword_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeMyPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cambiar mi contraseña (exige la contraseña actual)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/{code}/password": {
+      "patch": {
+        "operationId": "UsersController_resetPassword_v1",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resetear la contraseña de un usuario (admin)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/{code}/status": {
+      "patch": {
+        "operationId": "UsersController_setStatus_v1",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Activar/desactivar un usuario",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/{code}/role": {
+      "patch": {
+        "operationId": "UsersController_setRole_v1",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cambiar el rol de un usuario (revoca sus sesiones; el rol aplica al re-login)",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/identity-types": {
+      "get": {
+        "operationId": "IdentityTypesController_findAll_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogEntryResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar tipos de identificación",
+        "tags": [
+          "catalogs"
+        ]
+      },
+      "post": {
+        "operationId": "IdentityTypesController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCatalogEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogEntryResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear tipo de identificación",
+        "tags": [
+          "catalogs"
+        ]
+      }
+    },
+    "/api/v1/identity-types/{code}": {
+      "get": {
+        "operationId": "IdentityTypesController_findOne_v1",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogEntryResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar un tipo de identificación",
+        "tags": [
+          "catalogs"
+        ]
+      },
+      "delete": {
+        "operationId": "IdentityTypesController_remove_v1",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar tipo de identificación (implementa F16; 409 si tiene asociados)",
+        "tags": [
+          "catalogs"
+        ]
+      }
+    },
+    "/api/v1/note-types": {
+      "get": {
+        "operationId": "NoteTypesController_findAll_v1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CatalogEntryResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar tipos de pagaré",
+        "tags": [
+          "catalogs"
+        ]
+      },
+      "post": {
+        "operationId": "NoteTypesController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCatalogEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogEntryResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Crear tipo de pagaré",
+        "tags": [
+          "catalogs"
+        ]
+      }
+    },
+    "/api/v1/note-types/{code}": {
+      "get": {
+        "operationId": "NoteTypesController_findOne_v1",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogEntryResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar un tipo de pagaré",
+        "tags": [
+          "catalogs"
+        ]
+      },
+      "delete": {
+        "operationId": "NoteTypesController_remove_v1",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar tipo de pagaré (repara F19; 409 si tiene pagarés)",
+        "tags": [
+          "catalogs"
+        ]
+      }
+    },
+    "/api/v1/associates": {
+      "post": {
+        "operationId": "AssociatesController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAssociateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssociateResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registrar asociado (F5)",
+        "tags": [
+          "associates"
+        ]
+      },
+      "get": {
+        "operationId": "AssociatesController_findAll_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Página (desde 1)",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "Tamaño de página",
+            "schema": {
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Filtra por nombre, apellidos o identificación (contiene)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "Orden `campo:direccion`. El \"límite 6\" del legacy equivale a ?size=6&sort=updatedAt:desc",
+            "schema": {
+              "default": "updatedAt:desc",
+              "type": "string",
+              "enum": [
+                "updatedAt:desc",
+                "updatedAt:asc",
+                "createdAt:desc",
+                "createdAt:asc",
+                "names:asc",
+                "names:desc",
+                "numberIdentity:asc",
+                "numberIdentity:desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar asociados con paginación, búsqueda y orden (F6; el \"límite 6\" del legacy = ?size=6&sort=updatedAt:desc)",
+        "tags": [
+          "associates"
+        ]
+      }
+    },
+    "/api/v1/associates/{numberIdentity}": {
+      "get": {
+        "operationId": "AssociatesController_findOne_v1",
+        "parameters": [
+          {
+            "name": "numberIdentity",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssociateResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consultar asociado por identificación (F7)",
+        "tags": [
+          "associates"
+        ]
+      },
+      "put": {
+        "operationId": "AssociatesController_update_v1",
+        "parameters": [
+          {
+            "name": "numberIdentity",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAssociateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssociateResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Actualizar asociado (F8)",
+        "tags": [
+          "associates"
+        ]
+      }
+    },
+    "/api/v1/notes": {
+      "post": {
+        "operationId": "NotesController_create_v1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNoteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registrar pagaré (F9; 409 si duplicado, garantizado por la BD)",
+        "tags": [
+          "notes"
+        ]
+      },
+      "get": {
+        "operationId": "NotesController_findAll_v1",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Página (desde 1)",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "description": "Tamaño de página",
+            "schema": {
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "associateId",
+            "required": false,
+            "in": "query",
+            "description": "Filtra los pagarés de un asociado (deudor)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar pagarés con relaciones, paginado (F10); ?associateId= filtra por deudor (F11)",
+        "tags": [
+          "notes"
+        ]
+      }
+    },
+    "/api/v1/notes/{id}": {
+      "get": {
+        "operationId": "NotesController_findOne_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Detalle de pagaré (F12)",
+        "tags": [
+          "notes"
+        ]
+      },
+      "delete": {
+        "operationId": "NotesController_remove_v1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Eliminar pagaré (F13): soft delete con registro de quién eliminó",
+        "tags": [
+          "notes"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Administrative Notes API",
+    "description": "\nAPI de gestión de **pagarés (notas administrativas)**, **asociados** y **catálogos**\n(WCSC001 v2). Guía de integración paso a paso en `docs/functional/guia-integracion.md`.\n\n## Autenticación\n\nTodos los endpoints exigen `Authorization: Bearer <accessToken>` salvo\n`POST /auth/login` y `POST /auth/refresh`. El access token dura 15 minutos;\nal vencer, renueve con el refresh token (**de un solo uso**: cada refresh\nentrega un par nuevo y revoca el anterior).\n\n## Envelope de respuestas\n\n- Éxito: `{ \"data\": ..., \"meta\": { \"page\", \"size\", \"total\" }? }` (`meta` solo en listados paginados).\n- Error: `{ \"error\": { \"code\", \"message\", \"details\"?, \"traceId\", \"timestamp\" } }`.\n\nPrograme contra `error.code` (estable), no contra `message`. El catálogo\ncompleto está en `docs/error-codes.md`. El `traceId` correlaciona el error\ncon los logs del servidor: inclúyalo en reportes a soporte.\n\n## Paginación y orden\n\nListados: `?page` (desde 1) y `?size` (máx. 100). Asociados acepta además\n`?search` y `?sort=campo:direccion` (whitelist documentada en el endpoint).\n\n## Rate limiting\n\nGlobal por IP y, en `POST /auth/login`, 5 intentos por minuto por IP.\nExceso → `429 RATE_LIMITED`.\n",
+    "version": "2.1",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "Inicio de sesión, renovación de tokens y perfil"
+    },
+    {
+      "name": "users",
+      "description": "Gestión de usuarios del sistema (solo ADMIN)"
+    },
+    {
+      "name": "associates",
+      "description": "Asociados (socios) de la cooperativa"
+    },
+    {
+      "name": "notes",
+      "description": "Pagarés: creación, consulta y eliminación (soft delete)"
+    },
+    {
+      "name": "catalogs",
+      "description": "Catálogos: tipos de identificación y tipos de pagaré"
+    },
+    {
+      "name": "health",
+      "description": "Liveness/readiness para monitoreo (sin auth)"
+    }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "jperez"
+          },
+          "password": {
+            "type": "string",
+            "example": "MiClave.123"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "AuthUserDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "names": {
+            "type": "string"
+          },
+          "surnames": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "example": "OPERATOR"
+          },
+          "permissions": {
+            "example": [
+              "notes:read",
+              "notes:create"
+            ],
+            "type": "array",
+            "items": {
+              "type": "array"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "username",
+          "names",
+          "surnames",
+          "role",
+          "permissions"
+        ]
+      },
+      "AuthTokensDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Access token JWT (Bearer), expira en minutos"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh token opaco, de un solo uso (se rota en /refresh)"
+          },
+          "user": {
+            "$ref": "#/components/schemas/AuthUserDto"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken",
+          "user"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh token entregado en login/refresh"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Código único del usuario",
+            "example": "USR010"
+          },
+          "names": {
+            "type": "string",
+            "example": "Juan Carlos"
+          },
+          "surnames": {
+            "type": "string",
+            "example": "Pérez Gómez"
+          },
+          "username": {
+            "type": "string",
+            "example": "jperez"
+          },
+          "password": {
+            "type": "string",
+            "example": "Clave.Segura1"
+          },
+          "role": {
+            "type": "string",
+            "description": "Nombre del rol (según catálogo de roles)",
+            "example": "OPERATOR"
+          },
+          "image": {
+            "type": "string",
+            "description": "URL o nombre de archivo de avatar"
+          }
+        },
+        "required": [
+          "code",
+          "names",
+          "surnames",
+          "username",
+          "password",
+          "role"
+        ]
+      },
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "names": {
+            "type": "string"
+          },
+          "surnames": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "example": "OPERATOR"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "image": {
+            "type": "object",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "names",
+          "surnames",
+          "username",
+          "role",
+          "isActive",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PageMetaDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number"
+          },
+          "size": {
+            "type": "number"
+          },
+          "total": {
+            "type": "number",
+            "description": "Total de registros que satisfacen la consulta"
+          }
+        },
+        "required": [
+          "page",
+          "size",
+          "total"
+        ]
+      },
+      "PageDto": {
+        "type": "object",
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/PageMetaDto"
+          }
+        },
+        "required": [
+          "meta"
+        ]
+      },
+      "ChangeMyPasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "description": "Contraseña actual (obligatoria)"
+          },
+          "newPassword": {
+            "type": "string",
+            "example": "NuevaClave.2"
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string",
+            "example": "ClaveTemporal.1"
+          }
+        },
+        "required": [
+          "newPassword"
+        ]
+      },
+      "UpdateUserStatusDto": {
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean",
+            "description": "true = activo, false = desactivado"
+          }
+        },
+        "required": [
+          "isActive"
+        ]
+      },
+      "UpdateUserRoleDto": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "Nombre del rol nuevo (según catálogo de roles)",
+            "example": "OPERATOR"
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "CatalogEntryResponseDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "CC"
+          },
+          "name": {
+            "type": "string",
+            "example": "Cédula de ciudadanía"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateCatalogEntryDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Código único, se normaliza a mayúsculas",
+            "example": "CC"
+          },
+          "name": {
+            "type": "string",
+            "example": "Cédula de ciudadanía"
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ]
+      },
+      "CreateAssociateDto": {
+        "type": "object",
+        "properties": {
+          "numberIdentity": {
+            "type": "string",
+            "description": "Número de identificación (PK natural)",
+            "example": "1094123456"
+          },
+          "typeIdentity": {
+            "type": "string",
+            "description": "Código del tipo de identificación (catálogo)",
+            "example": "CC"
+          },
+          "names": {
+            "type": "string",
+            "example": "María Fernanda"
+          },
+          "surname1": {
+            "type": "string",
+            "example": "López"
+          },
+          "surname2": {
+            "type": "string",
+            "example": "Torres"
+          },
+          "dateBirth": {
+            "type": "string",
+            "description": "Fecha de nacimiento (YYYY-MM-DD), no puede ser futura",
+            "example": "1988-04-23"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ],
+            "default": "ACTIVE"
+          }
+        },
+        "required": [
+          "numberIdentity",
+          "typeIdentity",
+          "names",
+          "surname1",
+          "dateBirth"
+        ]
+      },
+      "AssociateResponseDto": {
+        "type": "object",
+        "properties": {
+          "numberIdentity": {
+            "type": "string",
+            "example": "1094123456"
+          },
+          "typeIdentity": {
+            "type": "string",
+            "example": "CC"
+          },
+          "identityTypeName": {
+            "type": "string",
+            "example": "Cédula de ciudadanía"
+          },
+          "names": {
+            "type": "string"
+          },
+          "surname1": {
+            "type": "string"
+          },
+          "surname2": {
+            "type": "object",
+            "nullable": true
+          },
+          "dateBirth": {
+            "type": "string",
+            "description": "YYYY-MM-DD",
+            "example": "1988-04-23"
+          },
+          "status": {
+            "type": "string",
+            "example": "ACTIVE"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "numberIdentity",
+          "typeIdentity",
+          "identityTypeName",
+          "names",
+          "surname1",
+          "dateBirth",
+          "status",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdateAssociateDto": {
+        "type": "object",
+        "properties": {
+          "typeIdentity": {
+            "type": "string",
+            "description": "Código del tipo de identificación (catálogo)",
+            "example": "CC"
+          },
+          "names": {
+            "type": "string",
+            "example": "María Fernanda"
+          },
+          "surname1": {
+            "type": "string",
+            "example": "López"
+          },
+          "surname2": {
+            "type": "string",
+            "example": "Torres"
+          },
+          "dateBirth": {
+            "type": "string",
+            "description": "Fecha de nacimiento (YYYY-MM-DD), no puede ser futura",
+            "example": "1988-04-23"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ],
+            "default": "ACTIVE"
+          }
+        },
+        "required": [
+          "typeIdentity",
+          "names",
+          "surname1",
+          "dateBirth"
+        ]
+      },
+      "CreateNoteDto": {
+        "type": "object",
+        "properties": {
+          "associateId": {
+            "type": "string",
+            "description": "Identificación del asociado deudor",
+            "example": "1094123456"
+          },
+          "typeNote": {
+            "type": "string",
+            "description": "Código del tipo de pagaré (catálogo)",
+            "example": "LIBRE"
+          },
+          "codeudor1Id": {
+            "type": "string",
+            "description": "Identificación del primer codeudor (asociado)"
+          },
+          "codeudor2Id": {
+            "type": "string",
+            "description": "Identificación del segundo codeudor (asociado)"
+          }
+        },
+        "required": [
+          "associateId",
+          "typeNote"
+        ]
+      },
+      "NoteAssociateSummaryDto": {
+        "type": "object",
+        "properties": {
+          "numberIdentity": {
+            "type": "string",
+            "example": "1094123456"
+          },
+          "names": {
+            "type": "string"
+          },
+          "surname1": {
+            "type": "string"
+          },
+          "surname2": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "numberIdentity",
+          "names",
+          "surname1"
+        ]
+      },
+      "NoteTypeSummaryDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "LIBRE"
+          },
+          "name": {
+            "type": "string",
+            "example": "Inversión libre"
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ]
+      },
+      "NoteResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "associate": {
+            "$ref": "#/components/schemas/NoteAssociateSummaryDto"
+          },
+          "noteType": {
+            "$ref": "#/components/schemas/NoteTypeSummaryDto"
+          },
+          "codeudor1": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NoteAssociateSummaryDto"
+              }
+            ]
+          },
+          "codeudor2": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NoteAssociateSummaryDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "associate",
+          "noteType",
+          "createdAt",
+          "updatedAt"
+        ]
+      }
+    }
+  }
+}
