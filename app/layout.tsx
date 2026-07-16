@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
+import { auth } from '@/auth';
+import { SessionProvider } from '@/components/providers/SessionProvider';
 import { ToasterProvider } from '@/components/providers/ToasterProvider';
 import './globals.css';
 
@@ -24,19 +26,23 @@ export const metadata: Metadata = {
     'Gestión de asociados y pagarés (notas administrativas) de COINTRAMIN.',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html
       lang="es"
       className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        {children}
-        <ToasterProvider />
+        <SessionProvider session={session}>
+          {children}
+          <ToasterProvider />
+        </SessionProvider>
       </body>
     </html>
   );
