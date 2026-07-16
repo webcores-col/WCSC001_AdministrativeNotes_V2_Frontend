@@ -20,7 +20,7 @@ const eslintConfig = defineConfig([
     'build/**',
     'next-env.d.ts',
     'openapi/**',
-    'lib/api/generated/**',
+    'lib/api/schema.d.ts',
   ]),
 ]);
 

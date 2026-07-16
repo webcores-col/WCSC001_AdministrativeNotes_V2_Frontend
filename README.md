@@ -9,17 +9,17 @@ arquitectura BFF.
 
 ## Stack
 
-| Capa               | Tecnología                                                                             |
-| ------------------ | -------------------------------------------------------------------------------------- |
-| Runtime            | Node.js 22 (imagen Docker) / ≥20.9 local · TypeScript 5 estricto                       |
-| Framework          | Next.js 16 (App Router) + React 19                                                     |
-| Estilos            | Tailwind CSS v4 + shadcn/ui (Radix UI)                                                 |
-| Estado de servidor | TanStack Query v5                                                                      |
-| Formularios        | react-hook-form + zod                                                                  |
-| Sesión/Auth        | Auth.js v5 (Credentials) + proxy BFF propio                                            |
-| Tipado del API     | openapi-typescript + openapi-fetch sobre `openapi/schema.json`                         |
-| Testing            | Vitest + React Testing Library + MSW (unit/componentes/integración) · Playwright (e2e) |
-| Observabilidad     | @sentry/nextjs · pino                                                                  |
+| Capa               | Tecnología                                                                               |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| Runtime            | Node.js 22 (imagen Docker) / ≥20.9 local · TypeScript 5 estricto                         |
+| Framework          | Next.js 16 (App Router) + React 19                                                       |
+| Estilos            | Tailwind CSS v4 + shadcn/ui (Radix UI)                                                   |
+| Estado de servidor | TanStack Query v5                                                                        |
+| Formularios        | react-hook-form + zod                                                                    |
+| Sesión/Auth        | Auth.js v5 (Credentials) + proxy BFF propio                                              |
+| Tipado del API     | openapi-typescript sobre `openapi/schema.json` + cliente HTTP propio (`lib/api/http.ts`) |
+| Testing            | Vitest + React Testing Library + MSW (unit/componentes/integración) · Playwright (e2e)   |
+| Observabilidad     | @sentry/nextjs · pino                                                                    |
 
 ## Inicio rápido (desarrollo)
 
@@ -61,6 +61,16 @@ contra `error.code` del envelope de error, nunca contra `message`
 (catálogo completo en el `error-codes.md` del backend). Ver
 [ADR-001](docs/adr/ADR-001-frontend-bff-nextjs.md) para el manejo de sesión
 y refresh de tokens.
+
+Los tipos de los DTOs se generan con `openapi-typescript`
+(`lib/api/schema.d.ts`, no editar a mano — regenerar con
+`npm run generate:api-types`), reexportados con nombres cortos en
+`lib/api/types.ts`. Las respuestas **no** se resuelven con el tipado
+automático de un cliente como `openapi-fetch`: el contrato documenta el tipo
+del `data` interno, no el envelope completo con el que responde realmente el
+backend (el envelope lo aplica un interceptor global, invisible para
+Swagger). `lib/api/http.ts` siempre resuelve la respuesta con
+`unwrapEnvelope`, la única fuente de verdad sobre éxito/error.
 
 ## Documentación
 
