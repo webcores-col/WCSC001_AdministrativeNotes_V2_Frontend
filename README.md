@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# WCSC001 Administrative Notes — Frontend
 
-## Getting Started
+Frontend oficial (Next.js, patrón BFF) de
+[`WCSC001_AdministrativeNotes_V2`](https://github.com/webcores-col/WCSC001_AdministrativeNotes_V2)
+para COINTRAMIN: gestión de **asociados**, **pagarés** (notas
+administrativas), **catálogos** y **usuarios**. Ver
+[ADR-001](docs/adr/ADR-001-frontend-bff-nextjs.md) para el porqué de la
+arquitectura BFF.
 
-First, run the development server:
+## Stack
+
+| Capa               | Tecnología                                                                             |
+| ------------------ | -------------------------------------------------------------------------------------- |
+| Runtime            | Node.js 22 (imagen Docker) / ≥20.9 local · TypeScript 5 estricto                       |
+| Framework          | Next.js 16 (App Router) + React 19                                                     |
+| Estilos            | Tailwind CSS v4 + shadcn/ui (Radix UI)                                                 |
+| Estado de servidor | TanStack Query v5                                                                      |
+| Formularios        | react-hook-form + zod                                                                  |
+| Sesión/Auth        | Auth.js v5 (Credentials) + proxy BFF propio                                            |
+| Tipado del API     | openapi-typescript + openapi-fetch sobre `openapi/schema.json`                         |
+| Testing            | Vitest + React Testing Library + MSW (unit/componentes/integración) · Playwright (e2e) |
+| Observabilidad     | @sentry/nextjs · pino                                                                  |
+
+## Inicio rápido (desarrollo)
+
+Requiere el backend V2 corriendo localmente (ver su propio README).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 1. Variables de entorno
+cp .env.example .env.local
+npx auth secret               # completa AUTH_SECRET en .env.local
+
+# 2. Dependencias
+npm ci
+
+# 3. Tipos generados desde el snapshot del contrato (sin red, sin backend)
+npm run generate:api-types
+
+# 4. Levantar en modo watch
+npm run dev                   # http://localhost:3001
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Script                          | Descripción                                                 |
+| ------------------------------- | ----------------------------------------------------------- |
+| `npm run dev`                   | Servidor de desarrollo                                      |
+| `npm run lint` / `format:check` | ESLint / Prettier (verificar)                               |
+| `npm run typecheck`             | `tsc --noEmit`                                              |
+| `npm test`                      | Vitest (unit + componentes + integración MSW)               |
+| `npm run test:e2e`              | Playwright (workflow separado, no bloqueante en CI)         |
+| `npm run build`                 | Build de producción (`output: standalone`)                  |
+| `npm run generate:api-types`    | Regenerar tipos desde `openapi/schema.json`                 |
+| `npm run fetch:api-schema`      | Actualizar `openapi/schema.json` desde un backend corriendo |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Contrato del API
 
-## Learn More
+Este proyecto consume el contrato real de `WCSC001_AdministrativeNotes_V2`,
+congelado en [`openapi/schema.json`](openapi/schema.json). La UI programa
+contra `error.code` del envelope de error, nunca contra `message`
+(catálogo completo en el `error-codes.md` del backend). Ver
+[ADR-001](docs/adr/ADR-001-frontend-bff-nextjs.md) para el manejo de sesión
+y refresh de tokens.
 
-To learn more about Next.js, take a look at the following resources:
+## Documentación
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Documento                | Contenido                  |
+| ------------------------ | -------------------------- |
+| [`docs/adr/`](docs/adr/) | Decisiones de arquitectura |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Estructura
 
-## Deploy on Vercel
+```
+app/
+  (public)/login/               # login, fuera del shell protegido
+  (app)/                        # route group protegido por sesión
+    dashboard/ asociados/ pagares/ catalogos/ usuarios/ perfil/
+  api/
+    auth/[...nextauth]/          # Auth.js
+    v1/[...path]/                # proxy BFF hacia el backend
+    health/                      # liveness propio
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+components/
+  ui/                            # primitivos shadcn/ui
+  layout/ domain/ shared/ providers/
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+lib/
+  api/       # cliente tipado, envelope, mapeo de errores
+  auth/      # refresh single-flight, decode-jwt
+  permissions/ menu/ query/ hooks/ zod/ logging/ tracing/
+
+openapi/schema.json              # snapshot congelado del contrato real
+```
+
+## Convenciones
+
+- Toda vista de datos maneja explícitamente carga/vacío/error con los
+  componentes compartidos de `components/shared/` — nunca reimplementados
+  por módulo.
+- El menú y las acciones de UI se derivan de `permissions[]` (respuesta real
+  de `/auth/me`), no de un rol hardcodeado en el cliente.
+- Sin dark mode ni i18n en esta versión (alcance explícito).
