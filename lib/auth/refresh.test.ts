@@ -80,17 +80,37 @@ describe("refreshAccessToken (single-flight)", () => {
     expect(b.refreshToken).toBe("rotated-token-b");
   });
 
-  it("permite un nuevo refresh del mismo valor una vez el anterior ya terminó", async () => {
+  it("reusa el resultado ya resuelto del mismo token durante la ventana de gracia (peticiones realmente paralelas, no solo solapadas)", async () => {
+    let callCount = 0;
+    global.fetch = vi.fn(async () => {
+      callCount += 1;
+      return mockRefreshResponse("rotated-once");
+    }) as typeof fetch;
+
+    const first = await refreshAccessToken("token-grace-reuse");
+    const second = await refreshAccessToken("token-grace-reuse");
+
+    expect(callCount).toBe(1);
+    expect(second).toEqual(first);
+  });
+
+  it("tras la ventana de gracia, un refresh nuevo del mismo valor sí dispara una llamada nueva", async () => {
+    vi.useFakeTimers();
     let callCount = 0;
     global.fetch = vi.fn(async () => {
       callCount += 1;
       return mockRefreshResponse(`rotated-${callCount}`);
     }) as typeof fetch;
 
-    await refreshAccessToken("token-x");
-    await refreshAccessToken("token-x");
+    try {
+      await refreshAccessToken("token-grace-expiry");
+      await vi.advanceTimersByTimeAsync(10_001);
+      await refreshAccessToken("token-grace-expiry");
 
-    expect(callCount).toBe(2);
+      expect(callCount).toBe(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("propaga el error si el backend rechaza el refresh (token robado/vencido)", async () => {

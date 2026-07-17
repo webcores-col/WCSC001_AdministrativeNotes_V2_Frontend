@@ -1,21 +1,34 @@
 import { randomUUID } from "node:crypto";
-import { NextResponse, type NextRequest } from "next/server";
+import type { NextAuthRequest } from "next-auth";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { refreshAccessToken } from "@/lib/auth/refresh";
 
 /**
  * Proxy same-origin hacia el backend real: el navegador solo habla con su
  * propio origen (`/api/v1/*`), nunca con `BACKEND_URL` ni con los JWT del
  * backend (ver ADR-001). Adjunta `Authorization` del lado servidor y
- * propaga `X-Request-Id` para correlacionar con los logs del backend
- * (Fase 11).
+ * propaga `X-Request-Id` para correlacionar con los logs del backend.
+ *
+ * Envuelto con `auth(handler)` (no `await auth()` suelto) a propósito: es
+ * la única forma soportada por Auth.js v5 de persistir en el `Set-Cookie`
+ * de la respuesta un refresh proactivo hecho por el callback `jwt` (ver
+ * auth.ts) cuando se dispara desde un Route Handler — con `await auth()`
+ * suelto el refresh pasa igual (rota el token en el backend) pero la
+ * cookie del cliente se queda con el refresh token viejo, ya consumido; la
+ * siguiente petición que también necesite refrescar lo reusa y el backend
+ * lo trata como robo de sesión, revocando TODAS las sesiones del usuario.
+ * Bug real reproducido en el smoke test de Fase 5 (dos peticiones seguidas
+ * al proxy cerca del vencimiento del access token bastan) y corregido
+ * aquí — por eso ya no hace falta el reintento manual con
+ * `refreshAccessToken` que había antes: el refresh proactivo ya persiste
+ * correctamente.
  */
 async function handler(
-  request: NextRequest,
+  request: NextAuthRequest,
   context: { params: Promise<{ path: string[] }> },
 ): Promise<NextResponse> {
-  const session = await auth();
-  if (!session) {
+  const session = request.auth;
+  if (!session || session.error === "RefreshTokenError") {
     return unauthorizedEnvelope();
   }
 
@@ -24,21 +37,13 @@ async function handler(
   const requestId = request.headers.get("x-request-id") ?? randomUUID();
   const body = await readBody(request);
 
-  let response = await forward(targetUrl, request.method, session.accessToken, requestId, body);
-
-  if (response.status === 401) {
-    // El refresh proactivo del middleware normalmente evita llegar aquí;
-    // esto cubre la carrera de que el access token venza entre el
-    // middleware y esta petición. No reescribe la cookie de sesión (Auth.js
-    // v5 no lo permite de forma soportada desde un Route Handler fuera del
-    // flujo de `auth()`) — la próxima navegación la refresca vía middleware.
-    try {
-      const refreshed = await refreshAccessToken(session.refreshToken);
-      response = await forward(targetUrl, request.method, refreshed.accessToken, requestId, body);
-    } catch {
-      return unauthorizedEnvelope();
-    }
-  }
+  const response = await forward(
+    targetUrl,
+    request.method,
+    session.accessToken,
+    requestId,
+    body,
+  );
 
   const responseBody = await response.text();
   return new NextResponse(responseBody, {
@@ -69,7 +74,9 @@ async function forward(
   });
 }
 
-async function readBody(request: NextRequest): Promise<string | undefined> {
+async function readBody(
+  request: NextAuthRequest,
+): Promise<string | undefined> {
   if (request.method === "GET" || request.method === "HEAD") return undefined;
   const text = await request.text();
   return text.length > 0 ? text : undefined;
@@ -93,10 +100,12 @@ function unauthorizedEnvelope(): NextResponse {
   );
 }
 
+const wrappedHandler = auth(handler);
+
 export {
-  handler as DELETE,
-  handler as GET,
-  handler as PATCH,
-  handler as POST,
-  handler as PUT,
+  wrappedHandler as DELETE,
+  wrappedHandler as GET,
+  wrappedHandler as PATCH,
+  wrappedHandler as POST,
+  wrappedHandler as PUT,
 };

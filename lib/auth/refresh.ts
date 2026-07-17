@@ -24,8 +24,19 @@ export interface RefreshResult extends TokenPair {
  * réplica (caso actual del despliegue). Escalar horizontalmente exigiría un
  * store compartido (Redis u otro), que no forma parte de esta
  * infraestructura hoy.
+ *
+ * La entrada no se borra apenas la promesa resuelve: se mantiene
+ * `RECENTLY_RESOLVED_GRACE_MS` más. Sin esto, una petición que arranca
+ * justo *después* de que otra ya resolvió el refresh del mismo token viejo
+ * (ráfagas realmente paralelas, no solo solapadas) no encuentra nada en el
+ * mapa y reintenta por su cuenta con un token que el backend ya consumió
+ * — mismo síntoma que el problema que este single-flight existe para
+ * evitar, solo que en el borde de la ventana en vez de en medio de ella.
+ * Reproducido real: 5 peticiones lanzadas en paralelo tumbaron la sesión
+ * incluso con el single-flight básico.
  */
 const inFlightRefreshes = new Map<string, Promise<RefreshResult>>();
+const RECENTLY_RESOLVED_GRACE_MS = 10_000;
 
 export function refreshAccessToken(
   refreshToken: string,
@@ -35,10 +46,21 @@ export function refreshAccessToken(
     return existing;
   }
 
-  const promise = performRefresh(refreshToken).finally(() => {
-    inFlightRefreshes.delete(refreshToken);
-  });
+  const promise = performRefresh(refreshToken);
   inFlightRefreshes.set(refreshToken, promise);
+  promise
+    .finally(() => {
+      setTimeout(
+        () => inFlightRefreshes.delete(refreshToken),
+        RECENTLY_RESOLVED_GRACE_MS,
+      );
+    })
+    .catch(() => {
+      // El rechazo real ya se propaga a quien llamó `refreshAccessToken`
+      // vía el `promise` retornado abajo; este `catch` solo evita que la
+      // cadena interna de limpieza (creada por `.finally`, que es una
+      // promesa nueva y distinta) quede como una rechazada sin manejar.
+    });
   return promise;
 }
 
