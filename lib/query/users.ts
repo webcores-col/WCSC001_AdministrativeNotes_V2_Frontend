@@ -17,7 +17,16 @@ export interface UsersListParams {
   search: string;
 }
 
-export function useUsersQuery(params: UsersListParams) {
+/**
+ * `options.enabled` permite omitir la petición (p. ej. el contador de
+ * usuarios del dashboard cuando la sesión no tiene `users:read`) sin violar
+ * las reglas de hooks — el hook siempre se llama, TanStack Query solo no
+ * dispara el fetch.
+ */
+export function useUsersQuery(
+  params: UsersListParams,
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: ["users", params],
     queryFn: () =>
@@ -28,6 +37,7 @@ export function useUsersQuery(params: UsersListParams) {
           search: params.search || undefined,
         },
       }),
+    enabled: options?.enabled ?? true,
     placeholderData: (previousData) => previousData,
   });
 }
