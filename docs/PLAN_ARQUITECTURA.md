@@ -29,10 +29,10 @@ Fase 3 el roadmap solo vivía disperso en comentarios de código
 | 6 | Pagarés (F9–F13): listado + filtro por deudor, alta (selector deudor/codeudores/tipo vía `AssociatePicker`), detalle, eliminación lógica con confirmación. Corrigió dos bugs reales de la capa HTTP con el primer endpoint 204 (`lib/api/http.ts` y el proxy BFF no sabían manejar respuestas sin cuerpo) | ✅ `7fa44da` |
 | 7 | Catálogos (F14–F19): tipos de identificación y tipos de pagaré, CRUD simple vía un único `CatalogManager` genérico, mutación solo ADMIN, errores de integridad (409) legibles | ✅ `5f6ac00` |
 | 8 | Usuarios + Perfil (F1–F4): alta (ADMIN), listado, reset de contraseña, activar/desactivar, cambio de rol (con confirmación, cierran sesiones); perfil propio (cambiar mi contraseña). Auto-cambio de rol/estado del propio ADMIN verificado como rechazado por el backend (422) | ✅ `179c8ec` |
-| 9 | **Dashboard real**: contadores + asociados recientes (reemplaza el placeholder de Fase 3) | ⬅️ **siguiente** |
-| 10 | Testing e2e (Playwright, workflow separado no bloqueante en CI): flujos críticos — login, alta de asociado, alta/eliminación de pagaré, gestión de usuarios | Pendiente |
-| 11 | Observabilidad: `@sentry/nextjs`, logging pino, correlación `X-Request-Id` con el backend (el proxy BFF ya lo genera/propaga desde Fase 3) | Pendiente |
-| 12 | Despliegue: Dockerfile `standalone`, `docker-compose.prod.yml`, `cd.yml` (mismo patrón GHCR + SSH + VPS que el backend), bloque Caddy + dominio propio (`<app>.cointramin.webcores.co`) | Pendiente |
+| 9 | Dashboard real: contadores (Asociados/Pagarés/Usuarios vía `meta.total`, el de Usuarios gated por `users:read`) + los 6 asociados actualizados más recientemente | ✅ `64ed70d` |
+| 10 | **Testing e2e** (Playwright, workflow separado no bloqueante en CI): flujos críticos — login, alta de asociado, alta/eliminación de pagaré, gestión de usuarios | Pendiente — módulo funcional completo (Fases 4–9), sin tocar infraestructura externa ni credenciales |
+| 11 | Observabilidad: `@sentry/nextjs`, logging pino, correlación `X-Request-Id` con el backend (el proxy BFF ya lo genera/propaga desde Fase 3) | Pendiente — necesita una cuenta/DSN de Sentry (decisión del usuario) |
+| 12 | Despliegue: Dockerfile `standalone`, `docker-compose.prod.yml`, `cd.yml` (mismo patrón GHCR + SSH + VPS que el backend), bloque Caddy + dominio propio (`<app>.cointramin.webcores.co`) | Pendiente — toca la infraestructura compartida del VPS de los 4 proyectos de COINTRAMIN, coordinar antes de tocarla |
 | 13 | Endurecimiento y cierre: pase de accesibilidad, auditoría de estados carga/vacío/error en todas las vistas, checklist final, tag de versión | Pendiente |
 
 ## Convenciones establecidas (Fases 0–3)
