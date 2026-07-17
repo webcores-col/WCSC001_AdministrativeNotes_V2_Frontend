@@ -45,14 +45,25 @@ async function handler(
     body,
   );
 
-  const responseBody = await response.text();
-  return new NextResponse(responseBody, {
+  const responseInit = {
     status: response.status,
     headers: {
       "Content-Type": response.headers.get("Content-Type") ?? "application/json",
       "X-Request-Id": requestId,
     },
-  });
+  };
+
+  // 204 (p. ej. DELETE /notes/:id) no admite body en la Response, ni
+  // siquiera vacío — el constructor lanza "Invalid response status code
+  // 204" si se le pasa uno. Bug real encontrado en el smoke test de
+  // Fase 6 (la eliminación de pagarés fue el primer endpoint 204 que
+  // pasó por este proxy).
+  if (response.status === 204) {
+    return new NextResponse(null, responseInit);
+  }
+
+  const responseBody = await response.text();
+  return new NextResponse(responseBody, responseInit);
 }
 
 async function forward(

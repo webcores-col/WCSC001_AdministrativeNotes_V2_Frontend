@@ -35,6 +35,12 @@ export function createHttpClient(baseUrl: string) {
       cache: 'no-store',
     });
 
+    // 204 (p. ej. DELETE /notes/:id) no trae cuerpo que envolver — intentar
+    // parsear JSON y desempaquetar un envelope inexistente siempre fallaría.
+    if (response.status === 204) {
+      return { data: undefined as T };
+    }
+
     const body: unknown = await response.json().catch(() => undefined);
     return unwrapEnvelope<T>(body, response.status);
   };

@@ -21,3 +21,17 @@ export function useIdentityTypesQuery() {
     staleTime: 5 * 60_000,
   });
 }
+
+/** Solo lectura, mismo criterio que useIdentityTypesQuery — alimenta el selector de tipo de pagaré. */
+export function useNoteTypesQuery() {
+  return useQuery({
+    queryKey: ["note-types"],
+    queryFn: async () => {
+      const { data } = await proxyClient<CatalogEntryResponseDto[]>(
+        "/note-types",
+      );
+      return data;
+    },
+    staleTime: 5 * 60_000,
+  });
+}
