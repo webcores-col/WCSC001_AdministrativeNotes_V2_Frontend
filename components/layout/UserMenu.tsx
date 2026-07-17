@@ -1,7 +1,8 @@
 "use client";
 
-import { LogOut } from "lucide-react";
+import { LogOut, UserRound } from "lucide-react";
 import { signOut } from "next-auth/react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,13 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { SessionUser } from "@/lib/auth/session-types";
-
-/** Espejo de los roles reales del backend (ver docs/functional/modulos.md). */
-const ROLE_LABELS: Record<string, string> = {
-  ADMIN: "Administrador",
-  OPERATOR: "Operador",
-  VIEWER: "Consulta",
-};
+import { ROLE_LABELS } from "@/lib/permissions/role-labels";
 
 export function UserMenu({ user }: { user: SessionUser }) {
   return (
@@ -33,6 +28,12 @@ export function UserMenu({ user }: { user: SessionUser }) {
           {ROLE_LABELS[user.role] ?? user.role}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/perfil">
+            <UserRound className="size-4" aria-hidden="true" />
+            Mi perfil
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => signOut({ redirectTo: "/login" })}>
           <LogOut className="size-4" aria-hidden="true" />
           Cerrar sesión

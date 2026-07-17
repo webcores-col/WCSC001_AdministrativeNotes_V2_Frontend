@@ -12,6 +12,10 @@ export type AuthTokensDto = Schemas['AuthTokensDto'];
 
 export type UserResponseDto = Schemas['UserResponseDto'];
 export type CreateUserDto = Schemas['CreateUserDto'];
+export type ChangeMyPasswordDto = Schemas['ChangeMyPasswordDto'];
+export type ResetPasswordDto = Schemas['ResetPasswordDto'];
+export type UpdateUserStatusDto = Schemas['UpdateUserStatusDto'];
+export type UpdateUserRoleDto = Schemas['UpdateUserRoleDto'];
 
 export type AssociateResponseDto = Schemas['AssociateResponseDto'];
 export type CreateAssociateDto = Schemas['CreateAssociateDto'];
