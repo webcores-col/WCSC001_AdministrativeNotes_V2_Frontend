@@ -1,37 +1,77 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { proxyClient } from "@/lib/api/proxy-client";
-import type { CatalogEntryResponseDto } from "@/lib/api/types";
+import type {
+  CatalogEntryResponseDto,
+  CreateCatalogEntryDto,
+} from "@/lib/api/types";
+
+export interface CatalogHooks {
+  useList: () => ReturnType<typeof useQuery<CatalogEntryResponseDto[]>>;
+  useCreate: () => ReturnType<
+    typeof useMutation<CatalogEntryResponseDto, unknown, CreateCatalogEntryDto>
+  >;
+  useDelete: () => ReturnType<typeof useMutation<void, unknown, string>>;
+}
 
 /**
- * Solo lectura: alimenta selectores (p. ej. tipo de identificación en el
- * formulario de asociados). El CRUD completo de catálogos es Fase 7; esta
- * query se reutiliza tal cual desde ahí.
+ * `identity-types` y `note-types` son estructuralmente idénticos (código +
+ * nombre, solo ADMIN crea/elimina, 409 si hay registros dependientes) — un
+ * único factory evita duplicar la misma lógica de query/mutación dos veces.
  */
-export function useIdentityTypesQuery() {
-  return useQuery({
-    queryKey: ["identity-types"],
-    queryFn: async () => {
-      const { data } = await proxyClient<CatalogEntryResponseDto[]>(
-        "/identity-types",
-      );
-      return data;
-    },
-    staleTime: 5 * 60_000,
-  });
+function createCatalogHooks(basePath: string, queryKey: string): CatalogHooks {
+  function useList() {
+    return useQuery({
+      queryKey: [queryKey],
+      queryFn: async () => {
+        const { data } = await proxyClient<CatalogEntryResponseDto[]>(basePath);
+        return data;
+      },
+      staleTime: 5 * 60_000,
+    });
+  }
+
+  function useCreate() {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: async (payload: CreateCatalogEntryDto) => {
+        const { data } = await proxyClient<CatalogEntryResponseDto>(basePath, {
+          method: "POST",
+          body: payload,
+        });
+        return data;
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: [queryKey] });
+      },
+    });
+  }
+
+  function useDelete() {
+    const queryClient = useQueryClient();
+    return useMutation({
+      mutationFn: async (code: string) => {
+        await proxyClient<undefined>(`${basePath}/${code}`, {
+          method: "DELETE",
+        });
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: [queryKey] });
+      },
+    });
+  }
+
+  return { useList, useCreate, useDelete };
 }
 
-/** Solo lectura, mismo criterio que useIdentityTypesQuery — alimenta el selector de tipo de pagaré. */
-export function useNoteTypesQuery() {
-  return useQuery({
-    queryKey: ["note-types"],
-    queryFn: async () => {
-      const { data } = await proxyClient<CatalogEntryResponseDto[]>(
-        "/note-types",
-      );
-      return data;
-    },
-    staleTime: 5 * 60_000,
-  });
-}
+export const identityTypeHooks = createCatalogHooks(
+  "/identity-types",
+  "identity-types",
+);
+export const noteTypeHooks = createCatalogHooks("/note-types", "note-types");
+
+/** Solo lectura: alimenta el selector de tipo de identificación en el formulario de asociados (Fase 5). */
+export const useIdentityTypesQuery = identityTypeHooks.useList;
+/** Solo lectura: alimenta el selector de tipo de pagaré en el formulario de pagarés (Fase 6). */
+export const useNoteTypesQuery = noteTypeHooks.useList;
