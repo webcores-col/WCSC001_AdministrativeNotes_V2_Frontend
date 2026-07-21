@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
-import { EditAssociateForm } from "@/components/domain/associates/EditAssociateForm";
-import { ErrorState } from "@/components/shared/ErrorState";
-import { LoadingState } from "@/components/shared/LoadingState";
-import { Badge } from "@/components/ui/badge";
-import { getSurname2 } from "@/lib/api/associate-utils";
-import { getErrorMessage } from "@/lib/api/error-message";
-import type { AssociateResponseDto } from "@/lib/api/types";
-import { hasPermission } from "@/lib/permissions/has-permission";
-import { useAssociateQuery } from "@/lib/query/associates";
+import { useParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { EditAssociateForm } from '@/components/domain/associates/EditAssociateForm';
+import { ErrorState } from '@/components/shared/ErrorState';
+import { LoadingState } from '@/components/shared/LoadingState';
+import { Badge } from '@/components/ui/badge';
+import { getSurname2 } from '@/lib/api/associate-utils';
+import { getErrorMessage } from '@/lib/api/error-message';
+import type { AssociateResponseDto } from '@/lib/api/types';
+import { hasPermission } from '@/lib/permissions/has-permission';
+import { useAssociateQuery } from '@/lib/query/associates';
 
 export default function AsociadoDetallePage() {
   const params = useParams<{ numberIdentity: string }>();
@@ -18,7 +18,7 @@ export default function AsociadoDetallePage() {
   const query = useAssociateQuery(params.numberIdentity);
   const canUpdate = hasPermission(
     session?.user.permissions,
-    "associates:update",
+    'associates:update',
   );
 
   return (
@@ -46,11 +46,7 @@ export default function AsociadoDetallePage() {
   );
 }
 
-function AssociateReadOnly({
-  associate,
-}: {
-  associate: AssociateResponseDto;
-}) {
+function AssociateReadOnly({ associate }: { associate: AssociateResponseDto }) {
   return (
     <dl className="grid max-w-md grid-cols-2 gap-x-4 gap-y-3 text-sm">
       <dt className="text-muted-foreground">Tipo de identificación</dt>
@@ -66,9 +62,9 @@ function AssociateReadOnly({
       <dt className="text-muted-foreground">Estado</dt>
       <dd>
         <Badge
-          variant={associate.status === "ACTIVE" ? "default" : "secondary"}
+          variant={associate.status === 'ACTIVE' ? 'default' : 'secondary'}
         >
-          {associate.status === "ACTIVE" ? "Activo" : "Inactivo"}
+          {associate.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
         </Badge>
       </dd>
     </dl>

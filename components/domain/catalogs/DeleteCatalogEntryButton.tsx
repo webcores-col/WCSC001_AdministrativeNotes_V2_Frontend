@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import type { UseMutationResult } from "@tanstack/react-query";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import type { UseMutationResult } from '@tanstack/react-query';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -13,8 +13,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { getErrorMessage } from "@/lib/api/error-message";
+} from '@/components/ui/dialog';
+import { getErrorMessage } from '@/lib/api/error-message';
 
 export function DeleteCatalogEntryButton({
   code,
@@ -38,8 +38,8 @@ export function DeleteCatalogEntryButton({
         <DialogHeader>
           <DialogTitle>¿Eliminar &quot;{name}&quot;?</DialogTitle>
           <DialogDescription>
-            Si hay asociados o pagarés que usan este código, el sistema
-            rechaza la eliminación en vez de dejar datos huérfanos.
+            Si hay asociados o pagarés que usan este código, el sistema rechaza
+            la eliminación en vez de dejar datos huérfanos.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -59,7 +59,7 @@ export function DeleteCatalogEntryButton({
               });
             }}
           >
-            {deleteMutation.isPending ? "Eliminando…" : "Eliminar"}
+            {deleteMutation.isPending ? 'Eliminando…' : 'Eliminar'}
           </Button>
         </DialogFooter>
       </DialogContent>

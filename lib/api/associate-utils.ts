@@ -1,4 +1,4 @@
-import type { AssociateResponseDto } from "./types";
+import type { AssociateResponseDto } from './types';
 
 /**
  * `surname2` llega tipado como `Record<string, never> | null` en el
@@ -8,15 +8,15 @@ import type { AssociateResponseDto } from "./types";
  * componente que lo muestra.
  */
 export function getSurname2(
-  associate: Pick<AssociateResponseDto, "surname2">,
+  associate: Pick<AssociateResponseDto, 'surname2'>,
 ): string {
-  return associate.surname2 == null ? "" : String(associate.surname2);
+  return associate.surname2 == null ? '' : String(associate.surname2);
 }
 
 export function associateFullName(
-  associate: Pick<AssociateResponseDto, "names" | "surname1" | "surname2">,
+  associate: Pick<AssociateResponseDto, 'names' | 'surname1' | 'surname2'>,
 ): string {
   return [associate.names, associate.surname1, getSurname2(associate)]
     .filter(Boolean)
-    .join(" ");
+    .join(' ');
 }

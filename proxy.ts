@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { NextResponse } from 'next/server';
+import { auth } from '@/auth';
 
-const PUBLIC_ROUTES = ["/login"];
+const PUBLIC_ROUTES = ['/login'];
 
 /**
  * Envolver con `auth()` ejecuta los callbacks `jwt`/`session` en cada
@@ -12,24 +12,24 @@ const PUBLIC_ROUTES = ["/login"];
  * 401 en el envelope del contrato, no con una redirección HTML.
  */
 export default auth((req) => {
-  const isLoggedIn = !!req.auth && req.auth.error !== "RefreshTokenError";
+  const isLoggedIn = !!req.auth && req.auth.error !== 'RefreshTokenError';
   const isPublicRoute = PUBLIC_ROUTES.some((route) =>
     req.nextUrl.pathname.startsWith(route),
   );
 
   if (!isLoggedIn && !isPublicRoute) {
-    const loginUrl = new URL("/login", req.nextUrl.origin);
-    loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname);
+    const loginUrl = new URL('/login', req.nextUrl.origin);
+    loginUrl.searchParams.set('callbackUrl', req.nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   if (isLoggedIn && isPublicRoute) {
-    return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
+    return NextResponse.redirect(new URL('/dashboard', req.nextUrl.origin));
   }
 
   return NextResponse.next();
 });
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

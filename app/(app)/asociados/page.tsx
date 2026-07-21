@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { useState } from "react";
-import { EmptyState } from "@/components/shared/EmptyState";
-import { ErrorState } from "@/components/shared/ErrorState";
-import { LoadingState } from "@/components/shared/LoadingState";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { useState } from 'react';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { ErrorState } from '@/components/shared/ErrorState';
+import { LoadingState } from '@/components/shared/LoadingState';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -23,29 +23,29 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { associateFullName } from "@/lib/api/associate-utils";
-import { getErrorMessage } from "@/lib/api/error-message";
-import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
-import { hasPermission } from "@/lib/permissions/has-permission";
-import { useAssociatesQuery } from "@/lib/query/associates";
+} from '@/components/ui/table';
+import { associateFullName } from '@/lib/api/associate-utils';
+import { getErrorMessage } from '@/lib/api/error-message';
+import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
+import { hasPermission } from '@/lib/permissions/has-permission';
+import { useAssociatesQuery } from '@/lib/query/associates';
 
 const PAGE_SIZE = 20;
 
 const SORT_OPTIONS = [
-  { value: "updatedAt:desc", label: "Actualizado (recientes primero)" },
-  { value: "updatedAt:asc", label: "Actualizado (antiguos primero)" },
-  { value: "names:asc", label: "Nombre (A-Z)" },
-  { value: "names:desc", label: "Nombre (Z-A)" },
-  { value: "numberIdentity:asc", label: "Identificación (ascendente)" },
-  { value: "numberIdentity:desc", label: "Identificación (descendente)" },
+  { value: 'updatedAt:desc', label: 'Actualizado (recientes primero)' },
+  { value: 'updatedAt:asc', label: 'Actualizado (antiguos primero)' },
+  { value: 'names:asc', label: 'Nombre (A-Z)' },
+  { value: 'names:desc', label: 'Nombre (Z-A)' },
+  { value: 'numberIdentity:asc', label: 'Identificación (ascendente)' },
+  { value: 'numberIdentity:desc', label: 'Identificación (descendente)' },
 ] as const;
 
 export default function AsociadosPage() {
   const { data: session } = useSession();
   const [page, setPage] = useState(1);
-  const [searchInput, setSearchInput] = useState("");
-  const [sort, setSort] = useState<string>("updatedAt:desc");
+  const [searchInput, setSearchInput] = useState('');
+  const [sort, setSort] = useState<string>('updatedAt:desc');
   const search = useDebouncedValue(searchInput, 300);
 
   const query = useAssociatesQuery({ page, size: PAGE_SIZE, search, sort });
@@ -54,7 +54,7 @@ export default function AsociadosPage() {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const canCreate = hasPermission(
     session?.user.permissions,
-    "associates:create",
+    'associates:create',
   );
 
   return (
@@ -112,8 +112,8 @@ export default function AsociadosPage() {
           title="No hay asociados"
           description={
             search
-              ? "No se encontraron asociados con ese criterio de búsqueda."
-              : "Todavía no hay asociados registrados."
+              ? 'No se encontraron asociados con ese criterio de búsqueda.'
+              : 'Todavía no hay asociados registrados.'
           }
         />
       )}
@@ -145,10 +145,10 @@ export default function AsociadosPage() {
                   <TableCell>
                     <Badge
                       variant={
-                        associate.status === "ACTIVE" ? "default" : "secondary"
+                        associate.status === 'ACTIVE' ? 'default' : 'secondary'
                       }
                     >
-                      {associate.status === "ACTIVE" ? "Activo" : "Inactivo"}
+                      {associate.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
                     </Badge>
                   </TableCell>
                 </TableRow>

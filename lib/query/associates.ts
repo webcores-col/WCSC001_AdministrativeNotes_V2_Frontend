@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { proxyClient } from "@/lib/api/proxy-client";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { proxyClient } from '@/lib/api/proxy-client';
 import type {
   AssociateResponseDto,
   CreateAssociateDto,
   UpdateAssociateDto,
-} from "@/lib/api/types";
+} from '@/lib/api/types';
 
 export interface AssociatesListParams {
   page: number;
@@ -18,9 +18,9 @@ export interface AssociatesListParams {
 /** `meta` trae el total para paginar (ver PageMetaDto); el detalle no lo necesita. */
 export function useAssociatesQuery(params: AssociatesListParams) {
   return useQuery({
-    queryKey: ["associates", params],
+    queryKey: ['associates', params],
     queryFn: () =>
-      proxyClient<AssociateResponseDto[]>("/associates", {
+      proxyClient<AssociateResponseDto[]>('/associates', {
         query: {
           page: params.page,
           size: params.size,
@@ -34,7 +34,7 @@ export function useAssociatesQuery(params: AssociatesListParams) {
 
 export function useAssociateQuery(numberIdentity: string | undefined) {
   return useQuery({
-    queryKey: ["associates", "detail", numberIdentity],
+    queryKey: ['associates', 'detail', numberIdentity],
     queryFn: async () => {
       const { data } = await proxyClient<AssociateResponseDto>(
         `/associates/${numberIdentity}`,
@@ -49,14 +49,14 @@ export function useCreateAssociateMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: CreateAssociateDto) => {
-      const { data } = await proxyClient<AssociateResponseDto>(
-        "/associates",
-        { method: "POST", body: payload },
-      );
+      const { data } = await proxyClient<AssociateResponseDto>('/associates', {
+        method: 'POST',
+        body: payload,
+      });
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["associates"] });
+      queryClient.invalidateQueries({ queryKey: ['associates'] });
     },
   });
 }
@@ -67,14 +67,14 @@ export function useUpdateAssociateMutation(numberIdentity: string) {
     mutationFn: async (payload: UpdateAssociateDto) => {
       const { data } = await proxyClient<AssociateResponseDto>(
         `/associates/${numberIdentity}`,
-        { method: "PUT", body: payload },
+        { method: 'PUT', body: payload },
       );
       return data;
     },
     onSuccess: (updated) => {
-      queryClient.invalidateQueries({ queryKey: ["associates"] });
+      queryClient.invalidateQueries({ queryKey: ['associates'] });
       queryClient.setQueryData(
-        ["associates", "detail", numberIdentity],
+        ['associates', 'detail', numberIdentity],
         updated,
       );
     },

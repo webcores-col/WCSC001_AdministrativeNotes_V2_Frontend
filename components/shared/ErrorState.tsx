@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 /**
  * `message` debe venir de `getErrorMessage`/`error.code` (lib/api/error-message.ts),
  * nunca del `Error.message` crudo — mismo criterio que el resto de la UI.
  */
 export function ErrorState({
-  message = "Ocurrió un error. Intente de nuevo.",
+  message = 'Ocurrió un error. Intente de nuevo.',
   onRetry,
 }: {
   message?: string;

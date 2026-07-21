@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { useState } from "react";
-import { ResetPasswordDialog } from "@/components/domain/users/ResetPasswordDialog";
-import { RoleSelectDialog } from "@/components/domain/users/RoleSelectDialog";
-import { ToggleStatusDialog } from "@/components/domain/users/ToggleStatusDialog";
-import { EmptyState } from "@/components/shared/EmptyState";
-import { ErrorState } from "@/components/shared/ErrorState";
-import { LoadingState } from "@/components/shared/LoadingState";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { useState } from 'react';
+import { ResetPasswordDialog } from '@/components/domain/users/ResetPasswordDialog';
+import { RoleSelectDialog } from '@/components/domain/users/RoleSelectDialog';
+import { ToggleStatusDialog } from '@/components/domain/users/ToggleStatusDialog';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { ErrorState } from '@/components/shared/ErrorState';
+import { LoadingState } from '@/components/shared/LoadingState';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -19,27 +19,27 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { getErrorMessage } from "@/lib/api/error-message";
-import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
-import { hasPermission } from "@/lib/permissions/has-permission";
-import { ROLE_LABELS } from "@/lib/permissions/role-labels";
-import { useUsersQuery } from "@/lib/query/users";
+} from '@/components/ui/table';
+import { getErrorMessage } from '@/lib/api/error-message';
+import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
+import { hasPermission } from '@/lib/permissions/has-permission';
+import { ROLE_LABELS } from '@/lib/permissions/role-labels';
+import { useUsersQuery } from '@/lib/query/users';
 
 const PAGE_SIZE = 20;
 
 export default function UsuariosPage() {
   const { data: session } = useSession();
   const [page, setPage] = useState(1);
-  const [searchInput, setSearchInput] = useState("");
+  const [searchInput, setSearchInput] = useState('');
   const search = useDebouncedValue(searchInput, 300);
 
   const query = useUsersQuery({ page, size: PAGE_SIZE, search });
   const rows = query.data?.data ?? [];
   const total = query.data?.meta?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const canCreate = hasPermission(session?.user.permissions, "users:create");
-  const canManage = hasPermission(session?.user.permissions, "users:update");
+  const canCreate = hasPermission(session?.user.permissions, 'users:create');
+  const canManage = hasPermission(session?.user.permissions, 'users:update');
 
   return (
     <div className="flex flex-col gap-4">
@@ -103,12 +103,10 @@ export default function UsuariosPage() {
                       {user.names} {user.surnames}
                     </TableCell>
                     <TableCell>{user.username}</TableCell>
+                    <TableCell>{ROLE_LABELS[user.role] ?? user.role}</TableCell>
                     <TableCell>
-                      {ROLE_LABELS[user.role] ?? user.role}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={user.isActive ? "default" : "secondary"}>
-                        {user.isActive ? "Activo" : "Inactivo"}
+                      <Badge variant={user.isActive ? 'default' : 'secondary'}>
+                        {user.isActive ? 'Activo' : 'Inactivo'}
                       </Badge>
                     </TableCell>
                     {canManage && (

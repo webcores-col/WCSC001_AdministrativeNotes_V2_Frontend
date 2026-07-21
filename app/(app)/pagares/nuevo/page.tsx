@@ -1,4 +1,4 @@
-import { CreateNoteForm } from "@/components/domain/notes/CreateNoteForm";
+import { CreateNoteForm } from '@/components/domain/notes/CreateNoteForm';
 
 export default function NuevoPagarePage() {
   return (

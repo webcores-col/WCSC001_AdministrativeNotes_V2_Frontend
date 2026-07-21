@@ -1,6 +1,6 @@
-import { CatalogManager } from "@/components/domain/catalogs/CatalogManager";
-import { CatalogTabs } from "@/components/domain/catalogs/CatalogTabs";
-import { identityTypeHooks } from "@/lib/query/catalogs";
+import { CatalogManager } from '@/components/domain/catalogs/CatalogManager';
+import { CatalogTabs } from '@/components/domain/catalogs/CatalogTabs';
+import { identityTypeHooks } from '@/lib/query/catalogs';
 
 export default function TiposIdentificacionPage() {
   return (

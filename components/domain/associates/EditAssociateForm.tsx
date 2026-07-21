@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { AssociateFieldset } from "@/components/domain/associates/AssociateFieldset";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-import { getSurname2 } from "@/lib/api/associate-utils";
-import { getErrorMessage } from "@/lib/api/error-message";
-import type { AssociateResponseDto } from "@/lib/api/types";
-import { useUpdateAssociateMutation } from "@/lib/query/associates";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { AssociateFieldset } from '@/components/domain/associates/AssociateFieldset';
+import { Button } from '@/components/ui/button';
+import { Form } from '@/components/ui/form';
+import { getSurname2 } from '@/lib/api/associate-utils';
+import { getErrorMessage } from '@/lib/api/error-message';
+import type { AssociateResponseDto } from '@/lib/api/types';
+import { useUpdateAssociateMutation } from '@/lib/query/associates';
 import {
   updateAssociateSchema,
   type UpdateAssociateInput,
-} from "@/lib/zod/associate.schema";
+} from '@/lib/zod/associate.schema';
 
 export function EditAssociateForm({
   associate,
@@ -30,7 +30,7 @@ export function EditAssociateForm({
       surname1: associate.surname1,
       surname2: getSurname2(associate),
       dateBirth: associate.dateBirth,
-      status: associate.status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
+      status: associate.status === 'INACTIVE' ? 'INACTIVE' : 'ACTIVE',
     },
   });
 
@@ -38,7 +38,7 @@ export function EditAssociateForm({
     mutation.mutate(
       { ...values, surname2: values.surname2 || undefined },
       {
-        onSuccess: () => toast.success("Asociado actualizado."),
+        onSuccess: () => toast.success('Asociado actualizado.'),
         onError: (error) => toast.error(getErrorMessage(error)),
       },
     );
@@ -46,10 +46,14 @@ export function EditAssociateForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={onSubmit} className="flex max-w-md flex-col gap-4" noValidate>
+      <form
+        onSubmit={onSubmit}
+        className="flex max-w-md flex-col gap-4"
+        noValidate
+      >
         <AssociateFieldset control={form.control} />
         <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Guardando…" : "Guardar cambios"}
+          {mutation.isPending ? 'Guardando…' : 'Guardar cambios'}
         </Button>
       </form>
     </Form>

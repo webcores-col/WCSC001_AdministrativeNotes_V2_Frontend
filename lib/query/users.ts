@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { proxyClient } from "@/lib/api/proxy-client";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { proxyClient } from '@/lib/api/proxy-client';
 import type {
   ChangeMyPasswordDto,
   CreateUserDto,
@@ -9,7 +9,7 @@ import type {
   UpdateUserRoleDto,
   UpdateUserStatusDto,
   UserResponseDto,
-} from "@/lib/api/types";
+} from '@/lib/api/types';
 
 export interface UsersListParams {
   page: number;
@@ -28,9 +28,9 @@ export function useUsersQuery(
   options?: { enabled?: boolean },
 ) {
   return useQuery({
-    queryKey: ["users", params],
+    queryKey: ['users', params],
     queryFn: () =>
-      proxyClient<UserResponseDto[]>("/users", {
+      proxyClient<UserResponseDto[]>('/users', {
         query: {
           page: params.page,
           size: params.size,
@@ -46,14 +46,14 @@ export function useCreateUserMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: CreateUserDto) => {
-      const { data } = await proxyClient<UserResponseDto>("/users", {
-        method: "POST",
+      const { data } = await proxyClient<UserResponseDto>('/users', {
+        method: 'POST',
         body: payload,
       });
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });
 }
@@ -62,8 +62,8 @@ export function useCreateUserMutation() {
 export function useChangeMyPasswordMutation() {
   return useMutation({
     mutationFn: async (payload: ChangeMyPasswordDto) => {
-      await proxyClient<undefined>("/users/me/password", {
-        method: "PATCH",
+      await proxyClient<undefined>('/users/me/password', {
+        method: 'PATCH',
         body: payload,
       });
     },
@@ -75,7 +75,7 @@ export function useResetPasswordMutation(code: string) {
   return useMutation({
     mutationFn: async (payload: ResetPasswordDto) => {
       await proxyClient<undefined>(`/users/${code}/password`, {
-        method: "PATCH",
+        method: 'PATCH',
         body: payload,
       });
     },
@@ -95,12 +95,12 @@ export function useSetUserStatusMutation() {
     }) => {
       const { data } = await proxyClient<UserResponseDto>(
         `/users/${code}/status`,
-        { method: "PATCH", body: payload },
+        { method: 'PATCH', body: payload },
       );
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });
 }
@@ -118,12 +118,12 @@ export function useSetUserRoleMutation() {
     }) => {
       const { data } = await proxyClient<UserResponseDto>(
         `/users/${code}/role`,
-        { method: "PATCH", body: payload },
+        { method: 'PATCH', body: payload },
       );
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
   });
 }

@@ -1,12 +1,12 @@
-import { Suspense } from "react";
-import { LoginForm } from "@/components/domain/auth/LoginForm";
+import { Suspense } from 'react';
+import { LoginForm } from '@/components/domain/auth/LoginForm';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card';
 
 export default function LoginPage() {
   return (

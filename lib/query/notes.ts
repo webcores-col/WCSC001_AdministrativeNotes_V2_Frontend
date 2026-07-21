@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { proxyClient } from "@/lib/api/proxy-client";
-import type { CreateNoteDto, NoteResponseDto } from "@/lib/api/types";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { proxyClient } from '@/lib/api/proxy-client';
+import type { CreateNoteDto, NoteResponseDto } from '@/lib/api/types';
 
 export interface NotesListParams {
   page: number;
@@ -12,9 +12,9 @@ export interface NotesListParams {
 
 export function useNotesQuery(params: NotesListParams) {
   return useQuery({
-    queryKey: ["notes", params],
+    queryKey: ['notes', params],
     queryFn: () =>
-      proxyClient<NoteResponseDto[]>("/notes", {
+      proxyClient<NoteResponseDto[]>('/notes', {
         query: {
           page: params.page,
           size: params.size,
@@ -27,7 +27,7 @@ export function useNotesQuery(params: NotesListParams) {
 
 export function useNoteQuery(id: number | undefined) {
   return useQuery({
-    queryKey: ["notes", "detail", id],
+    queryKey: ['notes', 'detail', id],
     queryFn: async () => {
       const { data } = await proxyClient<NoteResponseDto>(`/notes/${id}`);
       return data;
@@ -40,14 +40,14 @@ export function useCreateNoteMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload: CreateNoteDto) => {
-      const { data } = await proxyClient<NoteResponseDto>("/notes", {
-        method: "POST",
+      const { data } = await proxyClient<NoteResponseDto>('/notes', {
+        method: 'POST',
         body: payload,
       });
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
   });
 }
@@ -57,10 +57,10 @@ export function useDeleteNoteMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: number) => {
-      await proxyClient<undefined>(`/notes/${id}`, { method: "DELETE" });
+      await proxyClient<undefined>(`/notes/${id}`, { method: 'DELETE' });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
     },
   });
 }

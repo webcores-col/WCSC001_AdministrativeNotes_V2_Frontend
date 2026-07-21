@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { proxyClient } from "@/lib/api/proxy-client";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { proxyClient } from '@/lib/api/proxy-client';
 import type {
   CatalogEntryResponseDto,
   CreateCatalogEntryDto,
-} from "@/lib/api/types";
+} from '@/lib/api/types';
 
 export interface CatalogHooks {
   useList: () => ReturnType<typeof useQuery<CatalogEntryResponseDto[]>>;
@@ -37,7 +37,7 @@ function createCatalogHooks(basePath: string, queryKey: string): CatalogHooks {
     return useMutation({
       mutationFn: async (payload: CreateCatalogEntryDto) => {
         const { data } = await proxyClient<CatalogEntryResponseDto>(basePath, {
-          method: "POST",
+          method: 'POST',
           body: payload,
         });
         return data;
@@ -53,7 +53,7 @@ function createCatalogHooks(basePath: string, queryKey: string): CatalogHooks {
     return useMutation({
       mutationFn: async (code: string) => {
         await proxyClient<undefined>(`${basePath}/${code}`, {
-          method: "DELETE",
+          method: 'DELETE',
         });
       },
       onSuccess: () => {
@@ -66,10 +66,10 @@ function createCatalogHooks(basePath: string, queryKey: string): CatalogHooks {
 }
 
 export const identityTypeHooks = createCatalogHooks(
-  "/identity-types",
-  "identity-types",
+  '/identity-types',
+  'identity-types',
 );
-export const noteTypeHooks = createCatalogHooks("/note-types", "note-types");
+export const noteTypeHooks = createCatalogHooks('/note-types', 'note-types');
 
 /** Solo lectura: alimenta el selector de tipo de identificación en el formulario de asociados (Fase 5). */
 export const useIdentityTypesQuery = identityTypeHooks.useList;

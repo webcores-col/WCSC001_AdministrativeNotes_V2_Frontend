@@ -1,28 +1,28 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 function todayIsoDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
 const associateFields = {
-  typeIdentity: z.string().min(1, "Seleccione un tipo de identificación."),
-  names: z.string().min(1, "Los nombres son obligatorios."),
-  surname1: z.string().min(1, "El primer apellido es obligatorio."),
+  typeIdentity: z.string().min(1, 'Seleccione un tipo de identificación.'),
+  names: z.string().min(1, 'Los nombres son obligatorios.'),
+  surname1: z.string().min(1, 'El primer apellido es obligatorio.'),
   surname2: z.string().optional(),
   dateBirth: z
     .string()
-    .min(1, "La fecha de nacimiento es obligatoria.")
+    .min(1, 'La fecha de nacimiento es obligatoria.')
     .refine(
       (value) => value <= todayIsoDate(),
-      "La fecha de nacimiento no puede ser futura.",
+      'La fecha de nacimiento no puede ser futura.',
     ),
-  status: z.enum(["ACTIVE", "INACTIVE"]),
+  status: z.enum(['ACTIVE', 'INACTIVE']),
 };
 
 export const createAssociateSchema = z.object({
   numberIdentity: z
     .string()
-    .min(1, "El número de identificación es obligatorio."),
+    .min(1, 'El número de identificación es obligatorio.'),
   ...associateFields,
 });
 

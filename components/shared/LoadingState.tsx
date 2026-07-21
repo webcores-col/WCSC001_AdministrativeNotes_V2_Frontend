@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Placeholder de carga para vistas de listado (tablas). Las Fases 5-9 lo

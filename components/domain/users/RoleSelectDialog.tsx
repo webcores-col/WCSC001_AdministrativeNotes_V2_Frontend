@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -12,18 +12,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { getErrorMessage } from "@/lib/api/error-message";
-import { ROLE_LABELS } from "@/lib/permissions/role-labels";
-import { useSetUserRoleMutation } from "@/lib/query/users";
-import { ROLES } from "@/lib/zod/user.schema";
+} from '@/components/ui/select';
+import { getErrorMessage } from '@/lib/api/error-message';
+import { ROLE_LABELS } from '@/lib/permissions/role-labels';
+import { useSetUserRoleMutation } from '@/lib/query/users';
+import { ROLES } from '@/lib/zod/user.schema';
 
 export function RoleSelectDialog({
   code,
@@ -55,8 +55,8 @@ export function RoleSelectDialog({
         <DialogHeader>
           <DialogTitle>Cambiar rol de {username}</DialogTitle>
           <DialogDescription>
-            Cierra todas sus sesiones activas; el rol nuevo aplica en su
-            próximo ingreso.
+            Cierra todas sus sesiones activas; el rol nuevo aplica en su próximo
+            ingreso.
           </DialogDescription>
         </DialogHeader>
         <Select value={nextRole} onValueChange={setNextRole}>
@@ -85,7 +85,7 @@ export function RoleSelectDialog({
                 { code, payload: { role: nextRole } },
                 {
                   onSuccess: () => {
-                    toast.success("Rol actualizado.");
+                    toast.success('Rol actualizado.');
                     setOpen(false);
                   },
                   onError: (error) => toast.error(getErrorMessage(error)),
@@ -93,7 +93,7 @@ export function RoleSelectDialog({
               );
             }}
           >
-            {mutation.isPending ? "Guardando…" : "Confirmar"}
+            {mutation.isPending ? 'Guardando…' : 'Confirmar'}
           </Button>
         </DialogFooter>
       </DialogContent>

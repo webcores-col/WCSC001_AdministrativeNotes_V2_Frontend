@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-import { AppShell } from "@/components/layout/AppShell";
-import { QueryProvider } from "@/components/providers/QueryProvider";
+import { redirect } from 'next/navigation';
+import { auth } from '@/auth';
+import { AppShell } from '@/components/layout/AppShell';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 
 /**
  * `proxy.ts` ya redirige a `/login` sin sesión válida; este `redirect` es
@@ -15,7 +15,7 @@ export default async function AppLayout({
 }) {
   const session = await auth();
   if (!session) {
-    redirect("/login");
+    redirect('/login');
   }
 
   return (

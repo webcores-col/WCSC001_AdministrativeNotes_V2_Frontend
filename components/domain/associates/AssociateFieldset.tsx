@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import type { Control, FieldValues, Path } from "react-hook-form";
+import type { Control, FieldValues, Path } from 'react-hook-form';
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useIdentityTypesQuery } from "@/lib/query/catalogs";
+} from '@/components/ui/select';
+import { useIdentityTypesQuery } from '@/lib/query/catalogs';
 
 interface AssociateSharedFields extends FieldValues {
   typeIdentity: string;
@@ -24,7 +24,7 @@ interface AssociateSharedFields extends FieldValues {
   surname1: string;
   surname2?: string;
   dateBirth: string;
-  status: "ACTIVE" | "INACTIVE";
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 /** Campos comunes a alta y edición de asociados (todo excepto numberIdentity, que no se edita). */
@@ -39,7 +39,7 @@ export function AssociateFieldset<T extends AssociateSharedFields>({
     <>
       <FormField
         control={control}
-        name={"typeIdentity" as Path<T>}
+        name={'typeIdentity' as Path<T>}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Tipo de identificación</FormLabel>
@@ -64,7 +64,7 @@ export function AssociateFieldset<T extends AssociateSharedFields>({
 
       <FormField
         control={control}
-        name={"names" as Path<T>}
+        name={'names' as Path<T>}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Nombres</FormLabel>
@@ -78,7 +78,7 @@ export function AssociateFieldset<T extends AssociateSharedFields>({
 
       <FormField
         control={control}
-        name={"surname1" as Path<T>}
+        name={'surname1' as Path<T>}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Primer apellido</FormLabel>
@@ -92,12 +92,12 @@ export function AssociateFieldset<T extends AssociateSharedFields>({
 
       <FormField
         control={control}
-        name={"surname2" as Path<T>}
+        name={'surname2' as Path<T>}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Segundo apellido</FormLabel>
             <FormControl>
-              <Input {...field} value={field.value ?? ""} />
+              <Input {...field} value={field.value ?? ''} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -106,7 +106,7 @@ export function AssociateFieldset<T extends AssociateSharedFields>({
 
       <FormField
         control={control}
-        name={"dateBirth" as Path<T>}
+        name={'dateBirth' as Path<T>}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Fecha de nacimiento</FormLabel>
@@ -120,7 +120,7 @@ export function AssociateFieldset<T extends AssociateSharedFields>({
 
       <FormField
         control={control}
-        name={"status" as Path<T>}
+        name={'status' as Path<T>}
         render={({ field }) => (
           <FormItem>
             <FormLabel>Estado</FormLabel>

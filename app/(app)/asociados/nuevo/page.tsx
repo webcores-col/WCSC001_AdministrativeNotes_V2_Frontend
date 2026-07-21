@@ -1,4 +1,4 @@
-import { CreateAssociateForm } from "@/components/domain/associates/CreateAssociateForm";
+import { CreateAssociateForm } from '@/components/domain/associates/CreateAssociateForm';
 
 export default function NuevoAsociadoPage() {
   return (

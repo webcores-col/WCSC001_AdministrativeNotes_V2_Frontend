@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import type { Session } from "next-auth";
-import { SessionProvider as NextAuthSessionProvider } from "next-auth/react";
+import type { Session } from 'next-auth';
+import { SessionProvider as NextAuthSessionProvider } from 'next-auth/react';
 
 export function SessionProvider({
   session,

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { MENU_ITEMS } from "@/lib/menu/menu-definition";
-import { hasPermission } from "@/lib/permissions/has-permission";
-import { cn } from "@/lib/utils";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { MENU_ITEMS } from '@/lib/menu/menu-definition';
+import { hasPermission } from '@/lib/permissions/has-permission';
+import { cn } from '@/lib/utils';
 
 export function Sidebar({ permissions }: { permissions: string[] }) {
   const pathname = usePathname();
@@ -29,10 +29,10 @@ export function Sidebar({ permissions }: { permissions: string[] }) {
           <Link
             key={item.href}
             href={item.href}
-            aria-current={isActive ? "page" : undefined}
+            aria-current={isActive ? 'page' : undefined}
             className={cn(
-              "flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
-              isActive && "bg-accent text-accent-foreground",
+              'flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground',
+              isActive && 'bg-accent text-accent-foreground',
             )}
           >
             <Icon className="size-4" aria-hidden="true" />

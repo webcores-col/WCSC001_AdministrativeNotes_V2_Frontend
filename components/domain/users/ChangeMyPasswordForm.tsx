@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -11,23 +11,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { getErrorMessage } from "@/lib/api/error-message";
-import { useChangeMyPasswordMutation } from "@/lib/query/users";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { getErrorMessage } from '@/lib/api/error-message';
+import { useChangeMyPasswordMutation } from '@/lib/query/users';
 import {
   changeMyPasswordSchema,
   type ChangeMyPasswordInput,
-} from "@/lib/zod/user.schema";
+} from '@/lib/zod/user.schema';
 
 export function ChangeMyPasswordForm() {
   const mutation = useChangeMyPasswordMutation();
   const form = useForm<ChangeMyPasswordInput>({
     resolver: zodResolver(changeMyPasswordSchema),
     defaultValues: {
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
     },
   });
 
@@ -39,7 +39,7 @@ export function ChangeMyPasswordForm() {
       },
       {
         onSuccess: () => {
-          toast.success("Contraseña actualizada.");
+          toast.success('Contraseña actualizada.');
           form.reset();
         },
         onError: (error) => toast.error(getErrorMessage(error)),
@@ -78,11 +78,7 @@ export function ChangeMyPasswordForm() {
             <FormItem>
               <FormLabel>Nueva contraseña</FormLabel>
               <FormControl>
-                <Input
-                  type="password"
-                  autoComplete="new-password"
-                  {...field}
-                />
+                <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -95,18 +91,14 @@ export function ChangeMyPasswordForm() {
             <FormItem>
               <FormLabel>Confirmar nueva contraseña</FormLabel>
               <FormControl>
-                <Input
-                  type="password"
-                  autoComplete="new-password"
-                  {...field}
-                />
+                <Input type="password" autoComplete="new-password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Guardando…" : "Cambiar contraseña"}
+          {mutation.isPending ? 'Guardando…' : 'Cambiar contraseña'}
         </Button>
       </form>
     </Form>

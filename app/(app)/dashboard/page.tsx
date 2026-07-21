@@ -1,38 +1,38 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { EmptyState } from "@/components/shared/EmptyState";
-import { ErrorState } from "@/components/shared/ErrorState";
-import { LoadingState } from "@/components/shared/LoadingState";
-import { Badge } from "@/components/ui/badge";
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { ErrorState } from '@/components/shared/ErrorState';
+import { LoadingState } from '@/components/shared/LoadingState';
+import { Badge } from '@/components/ui/badge';
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { associateFullName } from "@/lib/api/associate-utils";
-import { getErrorMessage } from "@/lib/api/error-message";
-import { hasPermission } from "@/lib/permissions/has-permission";
-import { useAssociatesQuery } from "@/lib/query/associates";
-import { useNotesQuery } from "@/lib/query/notes";
-import { useUsersQuery } from "@/lib/query/users";
+} from '@/components/ui/card';
+import { associateFullName } from '@/lib/api/associate-utils';
+import { getErrorMessage } from '@/lib/api/error-message';
+import { hasPermission } from '@/lib/permissions/has-permission';
+import { useAssociatesQuery } from '@/lib/query/associates';
+import { useNotesQuery } from '@/lib/query/notes';
+import { useUsersQuery } from '@/lib/query/users';
 
 /** Mismo criterio que la pantalla principal del legacy: size=6&sort=updatedAt:desc. */
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const canReadUsers = hasPermission(session?.user.permissions, "users:read");
+  const canReadUsers = hasPermission(session?.user.permissions, 'users:read');
 
   const recentAssociates = useAssociatesQuery({
     page: 1,
     size: 6,
-    search: "",
-    sort: "updatedAt:desc",
+    search: '',
+    sort: 'updatedAt:desc',
   });
-  const notesCount = useNotesQuery({ page: 1, size: 1, associateId: "" });
+  const notesCount = useNotesQuery({ page: 1, size: 1, associateId: '' });
   const usersCount = useUsersQuery(
-    { page: 1, size: 1, search: "" },
+    { page: 1, size: 1, search: '' },
     { enabled: canReadUsers },
   );
 
@@ -110,10 +110,10 @@ export default function DashboardPage() {
                     </div>
                     <Badge
                       variant={
-                        associate.status === "ACTIVE" ? "default" : "secondary"
+                        associate.status === 'ACTIVE' ? 'default' : 'secondary'
                       }
                     >
-                      {associate.status === "ACTIVE" ? "Activo" : "Inactivo"}
+                      {associate.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
                     </Badge>
                   </Link>
                 </li>
@@ -144,7 +144,7 @@ function StatCard({
         <CardHeader>
           <CardDescription>{title}</CardDescription>
           <CardTitle className="text-3xl">
-            {isLoading ? "…" : isError ? "—" : value}
+            {isLoading ? '…' : isError ? '—' : value}
           </CardTitle>
         </CardHeader>
       </Card>

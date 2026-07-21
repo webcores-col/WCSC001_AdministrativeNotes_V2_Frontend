@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useSession } from "next-auth/react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { DeleteCatalogEntryButton } from "@/components/domain/catalogs/DeleteCatalogEntryButton";
-import { EmptyState } from "@/components/shared/EmptyState";
-import { ErrorState } from "@/components/shared/ErrorState";
-import { LoadingState } from "@/components/shared/LoadingState";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useSession } from 'next-auth/react';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { DeleteCatalogEntryButton } from '@/components/domain/catalogs/DeleteCatalogEntryButton';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { ErrorState } from '@/components/shared/ErrorState';
+import { LoadingState } from '@/components/shared/LoadingState';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -16,8 +16,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
@@ -25,14 +25,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { getErrorMessage } from "@/lib/api/error-message";
-import { hasPermission } from "@/lib/permissions/has-permission";
-import type { CatalogHooks } from "@/lib/query/catalogs";
+} from '@/components/ui/table';
+import { getErrorMessage } from '@/lib/api/error-message';
+import { hasPermission } from '@/lib/permissions/has-permission';
+import type { CatalogHooks } from '@/lib/query/catalogs';
 import {
   createCatalogEntrySchema,
   type CreateCatalogEntryInput,
-} from "@/lib/zod/catalog-entry.schema";
+} from '@/lib/zod/catalog-entry.schema';
 
 /** Reutilizado por tipos de identificación y tipos de pagaré (mismo shape código+nombre). */
 export function CatalogManager({
@@ -46,20 +46,17 @@ export function CatalogManager({
   const list = hooks.useList();
   const createMutation = hooks.useCreate();
   const deleteMutation = hooks.useDelete();
-  const canManage = hasPermission(
-    session?.user.permissions,
-    "catalogs:manage",
-  );
+  const canManage = hasPermission(session?.user.permissions, 'catalogs:manage');
 
   const form = useForm<CreateCatalogEntryInput>({
     resolver: zodResolver(createCatalogEntrySchema),
-    defaultValues: { code: "", name: "" },
+    defaultValues: { code: '', name: '' },
   });
 
   const onSubmit = form.handleSubmit((values) => {
     createMutation.mutate(values, {
       onSuccess: () => {
-        toast.success("Entrada creada.");
+        toast.success('Entrada creada.');
         form.reset();
       },
       onError: (error) => toast.error(getErrorMessage(error)),
@@ -104,7 +101,7 @@ export function CatalogManager({
               )}
             />
             <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? "Agregando…" : "Agregar"}
+              {createMutation.isPending ? 'Agregando…' : 'Agregar'}
             </Button>
           </form>
         </Form>

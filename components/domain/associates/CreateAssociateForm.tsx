@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { AssociateFieldset } from "@/components/domain/associates/AssociateFieldset";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+import { AssociateFieldset } from '@/components/domain/associates/AssociateFieldset';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -13,14 +13,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { getErrorMessage } from "@/lib/api/error-message";
-import { useCreateAssociateMutation } from "@/lib/query/associates";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { getErrorMessage } from '@/lib/api/error-message';
+import { useCreateAssociateMutation } from '@/lib/query/associates';
 import {
   createAssociateSchema,
   type CreateAssociateInput,
-} from "@/lib/zod/associate.schema";
+} from '@/lib/zod/associate.schema';
 
 export function CreateAssociateForm() {
   const router = useRouter();
@@ -29,13 +29,13 @@ export function CreateAssociateForm() {
   const form = useForm<CreateAssociateInput>({
     resolver: zodResolver(createAssociateSchema),
     defaultValues: {
-      numberIdentity: "",
-      typeIdentity: "",
-      names: "",
-      surname1: "",
-      surname2: "",
-      dateBirth: "",
-      status: "ACTIVE",
+      numberIdentity: '',
+      typeIdentity: '',
+      names: '',
+      surname1: '',
+      surname2: '',
+      dateBirth: '',
+      status: 'ACTIVE',
     },
   });
 
@@ -44,7 +44,7 @@ export function CreateAssociateForm() {
       { ...values, surname2: values.surname2 || undefined },
       {
         onSuccess: (created) => {
-          toast.success("Asociado registrado.");
+          toast.success('Asociado registrado.');
           router.push(`/asociados/${created.numberIdentity}`);
         },
         onError: (error) => {
@@ -56,7 +56,11 @@ export function CreateAssociateForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={onSubmit} className="flex max-w-md flex-col gap-4" noValidate>
+      <form
+        onSubmit={onSubmit}
+        className="flex max-w-md flex-col gap-4"
+        noValidate
+      >
         <FormField
           control={form.control}
           name="numberIdentity"
@@ -72,7 +76,7 @@ export function CreateAssociateForm() {
         />
         <AssociateFieldset control={form.control} />
         <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Guardando…" : "Registrar asociado"}
+          {mutation.isPending ? 'Guardando…' : 'Registrar asociado'}
         </Button>
       </form>
     </Form>

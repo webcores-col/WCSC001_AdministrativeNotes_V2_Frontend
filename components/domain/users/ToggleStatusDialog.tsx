@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogClose,
@@ -12,9 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { getErrorMessage } from "@/lib/api/error-message";
-import { useSetUserStatusMutation } from "@/lib/query/users";
+} from '@/components/ui/dialog';
+import { getErrorMessage } from '@/lib/api/error-message';
+import { useSetUserStatusMutation } from '@/lib/query/users';
 
 export function ToggleStatusDialog({
   code,
@@ -32,18 +32,18 @@ export function ToggleStatusDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" variant="outline" size="sm">
-          {isActive ? "Desactivar" : "Activar"}
+          {isActive ? 'Desactivar' : 'Activar'}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            ¿{isActive ? "Desactivar" : "Activar"} a {username}?
+            ¿{isActive ? 'Desactivar' : 'Activar'} a {username}?
           </DialogTitle>
           <DialogDescription>
             {isActive
-              ? "No podrá ingresar y sus sesiones activas se cierran de inmediato."
-              : "Podrá volver a ingresar con su usuario y contraseña."}
+              ? 'No podrá ingresar y sus sesiones activas se cierran de inmediato.'
+              : 'Podrá volver a ingresar con su usuario y contraseña.'}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -54,7 +54,7 @@ export function ToggleStatusDialog({
           </DialogClose>
           <Button
             type="button"
-            variant={isActive ? "destructive" : "default"}
+            variant={isActive ? 'destructive' : 'default'}
             disabled={mutation.isPending}
             onClick={() => {
               mutation.mutate(
@@ -62,7 +62,7 @@ export function ToggleStatusDialog({
                 {
                   onSuccess: () => {
                     toast.success(
-                      isActive ? "Usuario desactivado." : "Usuario activado.",
+                      isActive ? 'Usuario desactivado.' : 'Usuario activado.',
                     );
                     setOpen(false);
                   },
@@ -72,10 +72,10 @@ export function ToggleStatusDialog({
             }}
           >
             {mutation.isPending
-              ? "Guardando…"
+              ? 'Guardando…'
               : isActive
-                ? "Desactivar"
-                : "Activar"}
+                ? 'Desactivar'
+                : 'Activar'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,10 +1,10 @@
-import NextAuth, { CredentialsSignin, type Session } from "next-auth";
-import Credentials from "next-auth/providers/credentials";
-import { ApiError, unwrapEnvelope } from "@/lib/api/envelope";
-import { getTokenExpiryMs } from "@/lib/auth/decode-jwt";
-import { refreshAccessToken } from "@/lib/auth/refresh";
-import type { SessionUser, TokenPair } from "@/lib/auth/session-types";
-import { loginSchema } from "@/lib/zod/auth.schema";
+import NextAuth, { CredentialsSignin, type Session } from 'next-auth';
+import Credentials from 'next-auth/providers/credentials';
+import { ApiError, unwrapEnvelope } from '@/lib/api/envelope';
+import { getTokenExpiryMs } from '@/lib/auth/decode-jwt';
+import { refreshAccessToken } from '@/lib/auth/refresh';
+import type { SessionUser, TokenPair } from '@/lib/auth/session-types';
+import { loginSchema } from '@/lib/zod/auth.schema';
 
 /**
  * Refrescar un poco antes del vencimiento real evita la carrera en la que
@@ -21,20 +21,20 @@ const REFRESH_MARGIN_MS = 30_000;
  * integración del backend, §1: ambos casos pueden ocurrir en el login).
  */
 export class InvalidCredentialsError extends CredentialsSignin {
-  code = "invalid_credentials";
+  code = 'invalid_credentials';
 }
 
 export class RateLimitedError extends CredentialsSignin {
-  code = "rate_limited";
+  code = 'rate_limited';
 }
 
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session {
     user: SessionUser;
     accessToken: string;
     refreshToken: string;
     accessTokenExpires: number;
-    error?: "RefreshTokenError";
+    error?: 'RefreshTokenError';
   }
 
   interface User extends TokenPair {
@@ -42,24 +42,24 @@ declare module "next-auth" {
   }
 }
 
-declare module "@auth/core/jwt" {
+declare module '@auth/core/jwt' {
   interface JWT {
     accessToken: string;
     refreshToken: string;
     accessTokenExpires: number;
     user: SessionUser;
-    error?: "RefreshTokenError";
+    error?: 'RefreshTokenError';
   }
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  session: { strategy: "jwt" },
-  pages: { signIn: "/login" },
+  session: { strategy: 'jwt' },
+  pages: { signIn: '/login' },
   providers: [
     Credentials({
       credentials: {
-        username: { label: "Usuario" },
-        password: { label: "Contraseña", type: "password" },
+        username: { label: 'Usuario' },
+        password: { label: 'Contraseña', type: 'password' },
       },
       authorize: async (rawCredentials) => {
         const parsed = loginSchema.safeParse(rawCredentials);
@@ -71,8 +71,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const response = await fetch(
             `${process.env.BACKEND_URL}/api/v1/auth/login`,
             {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(parsed.data),
             },
           );
@@ -91,7 +91,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             user: data.user,
           };
         } catch (error) {
-          if (error instanceof ApiError && error.code === "RATE_LIMITED") {
+          if (error instanceof ApiError && error.code === 'RATE_LIMITED') {
             throw new RateLimitedError();
           }
           throw new InvalidCredentialsError();
@@ -131,7 +131,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // El refresh token ya no sirve (vencido o robo detectado): la
         // sesión queda marcada con error; el middleware la trata como no
         // autenticada y fuerza login de nuevo.
-        return { ...token, error: "RefreshTokenError" };
+        return { ...token, error: 'RefreshTokenError' };
       }
     },
     session: async ({ session, token }) => {
@@ -155,11 +155,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   events: {
     signOut: async (message) => {
       // Solo aplica a la estrategia JWT (siempre, en este proyecto).
-      if (!("token" in message) || !message.token?.refreshToken) return;
+      if (!('token' in message) || !message.token?.refreshToken) return;
       await fetch(`${process.env.BACKEND_URL}/api/v1/auth/logout`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${message.token.accessToken}`,
         },
         body: JSON.stringify({ refreshToken: message.token.refreshToken }),

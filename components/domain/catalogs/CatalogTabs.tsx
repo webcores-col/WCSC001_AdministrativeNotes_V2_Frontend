@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 const TABS = [
-  { href: "/catalogos/tipos-identificacion", label: "Tipos de identificación" },
-  { href: "/catalogos/tipos-pagare", label: "Tipos de pagaré" },
+  { href: '/catalogos/tipos-identificacion', label: 'Tipos de identificación' },
+  { href: '/catalogos/tipos-pagare', label: 'Tipos de pagaré' },
 ];
 
 export function CatalogTabs() {
@@ -20,10 +20,10 @@ export function CatalogTabs() {
           <Link
             key={tab.href}
             href={tab.href}
-            aria-current={isActive ? "page" : undefined}
+            aria-current={isActive ? 'page' : undefined}
             className={cn(
-              "border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground",
-              isActive && "border-primary text-foreground",
+              'border-b-2 border-transparent px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground',
+              isActive && 'border-primary text-foreground',
             )}
           >
             {tab.label}

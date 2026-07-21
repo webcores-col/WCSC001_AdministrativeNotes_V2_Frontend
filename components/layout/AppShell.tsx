@@ -1,6 +1,6 @@
-import { Header } from "@/components/layout/Header";
-import { Sidebar } from "@/components/layout/Sidebar";
-import type { SessionUser } from "@/lib/auth/session-types";
+import { Header } from '@/components/layout/Header';
+import { Sidebar } from '@/components/layout/Sidebar';
+import type { SessionUser } from '@/lib/auth/session-types';
 
 export function AppShell({
   user,
