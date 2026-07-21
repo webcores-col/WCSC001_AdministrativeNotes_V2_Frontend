@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import type { NextAuthRequest } from 'next-auth';
 import { NextResponse } from 'next/server';
+import * as Sentry from '@sentry/nextjs';
 import { auth } from '@/auth';
+import { logger } from '@/lib/logging/logger';
 
 /**
  * Proxy same-origin hacia el backend real: el navegador solo habla con su
@@ -36,13 +38,49 @@ async function handler(
   const targetUrl = buildTargetUrl(path, request.nextUrl.search);
   const requestId = request.headers.get('x-request-id') ?? randomUUID();
   const body = await readBody(request);
+  const startedAt = Date.now();
 
-  const response = await forward(
-    targetUrl,
-    request.method,
-    session.accessToken,
-    requestId,
-    body,
+  let response: Response;
+  try {
+    response = await forward(
+      targetUrl,
+      request.method,
+      session.accessToken,
+      requestId,
+      body,
+    );
+  } catch (error) {
+    // El backend no respondió en absoluto (red caída, timeout, DNS) —
+    // distinto de un error 4xx/5xx que el backend sí devuelve, que solo se
+    // relaya tal cual. Reportado con el mismo traceId que ve el cliente
+    // para poder cruzarlo si el backend también lo loguea.
+    Sentry.captureException(error, { tags: { traceId: requestId } });
+    logger.error(
+      { requestId, method: request.method, path: path.join('/'), err: error },
+      'proxy BFF: backend inalcanzable',
+    );
+    return NextResponse.json(
+      {
+        error: {
+          code: 'BACKEND_UNREACHABLE',
+          message: 'No se pudo conectar con el servidor. Intente de nuevo.',
+          traceId: requestId,
+          timestamp: new Date().toISOString(),
+        },
+      },
+      { status: 502, headers: { 'X-Request-Id': requestId } },
+    );
+  }
+
+  logger.info(
+    {
+      requestId,
+      method: request.method,
+      path: path.join('/'),
+      status: response.status,
+      responseTimeMs: Date.now() - startedAt,
+    },
+    'proxy BFF: petición completada',
   );
 
   const responseInit = {

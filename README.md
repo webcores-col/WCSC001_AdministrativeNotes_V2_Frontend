@@ -81,6 +81,24 @@ bloqueante) construyendo el backend desde su código fuente — necesita el
 secret `BACKEND_REPO_PAT` (no configurado todavía, ver comentario en ese
 archivo).
 
+## Observabilidad
+
+- **Sentry** (`@sentry/nextjs`): `instrumentation-client.ts` (navegador) e
+  `instrumentation.ts` (servidor/edge — `onRequestError` captura
+  automáticamente errores de Server Components, Route Handlers, Server
+  Actions y el proxy). Sin `NEXT_PUBLIC_SENTRY_DSN` el SDK no se
+  inicializa (no-op en desarrollo/tests). El DSN no es secreto — igual
+  termina expuesto en el bundle del navegador — por eso lleva el prefijo
+  `NEXT_PUBLIC_`. Subida de source maps opcional (`SENTRY_ORG`/
+  `SENTRY_PROJECT`/`SENTRY_AUTH_TOKEN`, ver `.env.example`).
+- **pino** (`lib/logging/logger.ts`): JSON a stdout, mismo criterio que el
+  backend — en el VPS se lee con `docker logs`. El proxy BFF
+  (`app/api/v1/[...path]/route.ts`) loguea cada petición con su
+  `X-Request-Id`, y si el backend es inalcanzable (red caída, timeout)
+  responde `502 BACKEND_UNREACHABLE` en vez de una página de error de
+  Next.js, reportando la excepción a Sentry con ese mismo `traceId` para
+  cruzarlo con los logs.
+
 ## Contrato del API
 
 Este proyecto consume el contrato real de `WCSC001_AdministrativeNotes_V2`,
