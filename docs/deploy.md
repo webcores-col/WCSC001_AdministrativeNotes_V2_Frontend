@@ -60,5 +60,15 @@ Caddy.
 
 ## Pendiente
 
-- Activar el CD (checklist de secrets/variables arriba).
 - UptimeRobot sobre `/api/health` (mismo criterio que el backend).
+
+## Verificado en producción
+
+CD activado y probado de punta a punta (`workflow_dispatch`): build → GHCR →
+SSH deploy → smoke test, los 3 jobs en verde, contenedor recreado con la
+imagen publicada (no la construida a mano). Login real contra
+`https://notes.cointramin.webcores.co` con el usuario admin sembrado en el
+backend de producción (`SEED_ADMIN_PASSWORD` de su propio `.env.prod`, no el
+de desarrollo local — son credenciales distintas): sesión con permisos
+ADMIN completos, `/dashboard` autenticado y proxy BFF a `/api/v1/*`
+respondiendo 200.
