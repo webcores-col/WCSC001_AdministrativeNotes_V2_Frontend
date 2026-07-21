@@ -1,0 +1,110 @@
+# CD: cada push a main publica la imagen en GHCR y (si el despliegue está
+# habilitado) la despliega en el VPS compartido de COINTRAMIN vía SSH.
+# Mismo patrón que el backend (WCSC001_AdministrativeNotes_V2/.github/
+# workflows/cd.yml) — ver también docs/PLAN_ARQUITECTURA.md, Fase 12.
+#
+# Sin el setup de variables/secrets de abajo, el workflow igual publica la
+# imagen (GITHUB_TOKEN basta) y el job de deploy queda en "skipped".
+name: CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-push:
+    name: Imagen Docker → GHCR
+    runs-on: ubuntu-latest
+    outputs:
+      # Primer tag (type=sha, listado primero abajo): ya normalizado por
+      # metadata-action (minúsculas). No reconstruir a mano en el job de
+      # deploy — ver el bug real que esto evita en el commit de Fase 3
+      # del backend.
+      image: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # NEXT_PUBLIC_* se hornea en el build (cliente Y servidor, ver
+          # Dockerfile) — no es secreto (termina expuesto en el bundle del
+          # navegador de todas formas), por eso viene de una variable de
+          # repo, no de un secret.
+          build-args: |
+            NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
+            NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE=${{ vars.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE }}
+
+  deploy:
+    name: Deploy VPS COINTRAMIN (SSH)
+    needs: build-push
+    # Se habilita creando la variable de repositorio VPS_DEPLOY_ENABLED=true
+    if: vars.VPS_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # docker-compose.prod.yml puede cambiar entre deploys — sincronizarlo
+      # es obligatorio, no asumir que el servidor ya tiene la versión
+      # correcta (mismo criterio que el backend).
+      - name: Sincronizar docker-compose.prod.yml al servidor
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ vars.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_DEPLOY_SSH_KEY }}
+          source: docker-compose.prod.yml
+          target: /opt/apps/wcsc001-frontend
+          overwrite: true
+
+      - name: Pull + recrear el contenedor por SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ vars.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_DEPLOY_SSH_KEY }}
+          envs: IMAGE
+          script: |
+            set -e
+            cd /opt/apps/wcsc001-frontend
+            echo "FRONTEND_IMAGE=$IMAGE" > .env
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
+            docker image prune -f
+        env:
+          IMAGE: ${{ needs.build-push.outputs.image }}
+
+      - name: Smoke test /api/health
+        run: |
+          curl --fail --silent --show-error --retry 12 --retry-delay 5 --retry-all-errors \
+            "${{ vars.PRODUCTION_URL }}/api/health"

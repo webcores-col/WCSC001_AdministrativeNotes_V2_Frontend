@@ -1,0 +1,26 @@
+# Despliegue de producción en el VPS compartido de COINTRAMIN.
+#
+# Se conecta a la red compartida entre los proyectos de este cliente,
+# definida fuera de este repo en /opt/infra del servidor (ver README.md).
+# Esta app es stateless (habla con el backend por la red Docker interna,
+# nunca sale a Internet) — no necesita su propio servicio de base de datos.
+#
+# `image` se resuelve con FRONTEND_IMAGE (variable en un `.env` junto a
+# este archivo, no versionado): en bootstrap/local apunta al build local
+# (`docker compose build`); el pipeline de CD la sobreescribe con la
+# imagen publicada en GHCR antes de `docker compose pull && up -d`.
+services:
+  frontend:
+    image: ${FRONTEND_IMAGE:-wcsc001-administrative-notes-frontend:prod}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wcsc001-frontend
+    restart: unless-stopped
+    env_file: .env.prod
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
