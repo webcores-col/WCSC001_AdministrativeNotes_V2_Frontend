@@ -1,14 +1,15 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { useState } from "react";
-import { AssociatePicker } from "@/components/domain/associates/AssociatePicker";
-import { DeleteNoteDialog } from "@/components/domain/notes/DeleteNoteDialog";
-import { EmptyState } from "@/components/shared/EmptyState";
-import { ErrorState } from "@/components/shared/ErrorState";
-import { LoadingState } from "@/components/shared/LoadingState";
-import { Button } from "@/components/ui/button";
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
+import { useState } from 'react';
+import { AssociatePicker } from '@/components/domain/associates/AssociatePicker';
+import { DeleteNoteDialog } from '@/components/domain/notes/DeleteNoteDialog';
+import { EmptyState } from '@/components/shared/EmptyState';
+import { ErrorState } from '@/components/shared/ErrorState';
+import { LoadingState } from '@/components/shared/LoadingState';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -16,11 +17,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { associateFullName } from "@/lib/api/associate-utils";
-import { getErrorMessage } from "@/lib/api/error-message";
-import { hasPermission } from "@/lib/permissions/has-permission";
-import { useNotesQuery } from "@/lib/query/notes";
+} from '@/components/ui/table';
+import { associateFullName } from '@/lib/api/associate-utils';
+import { getErrorMessage } from '@/lib/api/error-message';
+import { hasPermission } from '@/lib/permissions/has-permission';
+import { useNotesQuery } from '@/lib/query/notes';
 
 const PAGE_SIZE = 20;
 
@@ -32,13 +33,13 @@ export default function PagaresPage() {
   const query = useNotesQuery({
     page,
     size: PAGE_SIZE,
-    associateId: associateId ?? "",
+    associateId: associateId ?? '',
   });
   const rows = query.data?.data ?? [];
   const total = query.data?.meta?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const canCreate = hasPermission(session?.user.permissions, "notes:create");
-  const canDelete = hasPermission(session?.user.permissions, "notes:delete");
+  const canCreate = hasPermission(session?.user.permissions, 'notes:create');
+  const canDelete = hasPermission(session?.user.permissions, 'notes:delete');
 
   return (
     <div className="flex flex-col gap-4">
@@ -53,10 +54,14 @@ export default function PagaresPage() {
 
       <div className="flex flex-wrap items-end gap-2">
         <div className="w-72">
-          <span className="mb-1 block text-sm text-muted-foreground">
+          <Label
+            htmlFor="associateId-filter-picker"
+            className="mb-1 block text-sm text-muted-foreground"
+          >
             Filtrar por deudor
-          </span>
+          </Label>
           <AssociatePicker
+            id="associateId-filter-picker"
             value={associateId}
             onChange={(value) => {
               setPage(1);
@@ -93,8 +98,8 @@ export default function PagaresPage() {
           title="No hay pagarés"
           description={
             associateId
-              ? "Este asociado no tiene pagarés registrados."
-              : "Todavía no hay pagarés registrados."
+              ? 'Este asociado no tiene pagarés registrados.'
+              : 'Todavía no hay pagarés registrados.'
           }
         />
       )}
@@ -127,13 +132,13 @@ export default function PagaresPage() {
                   </TableCell>
                   <TableCell>{note.noteType.name}</TableCell>
                   <TableCell>
-                    {note.codeudor1 ? associateFullName(note.codeudor1) : "—"}
+                    {note.codeudor1 ? associateFullName(note.codeudor1) : '—'}
                   </TableCell>
                   <TableCell>
-                    {note.codeudor2 ? associateFullName(note.codeudor2) : "—"}
+                    {note.codeudor2 ? associateFullName(note.codeudor2) : '—'}
                   </TableCell>
                   <TableCell>
-                    {new Date(note.createdAt).toLocaleDateString("es-CO")}
+                    {new Date(note.createdAt).toLocaleDateString('es-CO')}
                   </TableCell>
                   {canDelete && (
                     <TableCell className="text-right">

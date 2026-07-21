@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { loginSchema, type LoginInput } from "@/lib/zod/auth.schema";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useTransition } from 'react';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { loginSchema, type LoginInput } from '@/lib/zod/auth.schema';
 
 /**
  * `signIn` con la estrategia Credentials solo expone el `code` de la
@@ -17,33 +17,40 @@ import { loginSchema, type LoginInput } from "@/lib/zod/auth.schema";
  * cliente antes de autenticar.
  */
 const ERROR_MESSAGES: Record<string, string> = {
-  invalid_credentials: "Usuario o contraseña incorrectos.",
-  rate_limited: "Demasiados intentos. Espere un minuto e intente de nuevo.",
+  invalid_credentials: 'Usuario o contraseña incorrectos.',
+  rate_limited: 'Demasiados intentos. Espere un minuto e intente de nuevo.',
 };
-const DEFAULT_ERROR_MESSAGE = "No se pudo iniciar sesión. Intente de nuevo.";
+const DEFAULT_ERROR_MESSAGE = 'No se pudo iniciar sesión. Intente de nuevo.';
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+  const callbackUrl = searchParams.get('callbackUrl') ?? '/dashboard';
   const [formError, setFormError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { username: "", password: "" },
+    defaultValues: { username: '', password: '' },
   });
 
   const onSubmit = form.handleSubmit((values) => {
     setFormError(null);
     startTransition(async () => {
-      const result = await signIn("credentials", {
+      const result = await signIn('credentials', {
         ...values,
         redirect: false,
       });
 
       if (result?.error) {
-        setFormError(ERROR_MESSAGES[result.error] ?? DEFAULT_ERROR_MESSAGE);
+        // `result.error` es siempre el string genérico "CredentialsSignin"
+        // (el nombre del tipo de error de Auth.js); el código propio que
+        // authorize() lanza (invalid_credentials/rate_limited) viaja en
+        // `result.code`, un campo separado — bug real encontrado por el
+        // e2e de Fase 10 (el mensaje específico nunca se mostraba).
+        setFormError(
+          (result.code && ERROR_MESSAGES[result.code]) ?? DEFAULT_ERROR_MESSAGE,
+        );
         return;
       }
 
@@ -61,9 +68,9 @@ export function LoginForm() {
           autoComplete="username"
           aria-invalid={!!form.formState.errors.username}
           aria-describedby={
-            form.formState.errors.username ? "username-error" : undefined
+            form.formState.errors.username ? 'username-error' : undefined
           }
-          {...form.register("username")}
+          {...form.register('username')}
         />
         {form.formState.errors.username && (
           <p id="username-error" className="text-sm text-destructive">
@@ -80,9 +87,9 @@ export function LoginForm() {
           autoComplete="current-password"
           aria-invalid={!!form.formState.errors.password}
           aria-describedby={
-            form.formState.errors.password ? "password-error" : undefined
+            form.formState.errors.password ? 'password-error' : undefined
           }
-          {...form.register("password")}
+          {...form.register('password')}
         />
         {form.formState.errors.password && (
           <p id="password-error" className="text-sm text-destructive">
@@ -98,7 +105,7 @@ export function LoginForm() {
       )}
 
       <Button type="submit" disabled={isPending}>
-        {isPending ? "Ingresando…" : "Ingresar"}
+        {isPending ? 'Ingresando…' : 'Ingresar'}
       </Button>
     </form>
   );
