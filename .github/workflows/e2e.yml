@@ -1,0 +1,119 @@
+name: E2E
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# No bloqueante a propósito (ver docs/PLAN_ARQUITECTURA.md, Fase 10): no es
+# un required status check, un fallo acá no impide mergear.
+#
+# Necesita el backend real corriendo (Postgres + migraciones + seed), no
+# solo este frontend. Se construye desde el código fuente del backend, NO
+# desde la imagen publicada en GHCR: esa imagen viene podada de
+# devDependencies (`npm prune --omit=dev` en su Dockerfile) y
+# `prisma db seed` depende de `ts-node`, que no sobrevive esa poda —
+# confirmado leyendo su Dockerfile, no probado en runtime.
+#
+# PENDIENTE DEL USUARIO (no verificado — no se pudo probar sin pushear y
+# correr Actions real): crear un secret `BACKEND_REPO_PAT` en este repo
+# (Settings → Secrets and variables → Actions) con un Personal Access
+# Token (classic, scope `repo`) que tenga lectura sobre
+# webcores-col/WCSC001_AdministrativeNotes_V2 — el GITHUB_TOKEN por
+# defecto de este repo no puede hacer checkout de otro repo privado.
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: wcsc
+          POSTGRES_PASSWORD: wcsc_ci
+          POSTGRES_DB: administrative_notes_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U wcsc"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://wcsc:wcsc_ci@localhost:5432/administrative_notes_e2e
+      DIRECT_DATABASE_URL: postgresql://wcsc:wcsc_ci@localhost:5432/administrative_notes_e2e
+      JWT_SECRET: e2e-secret-solo-para-pipeline-0123456789abcdef
+      CORS_ORIGINS: http://localhost:3001
+      # Sube el límite de intentos de login/minuto para que la suite no se
+      # tope con el rate limiting real — mismo criterio que usan los tests
+      # del propio backend (ver su .env.example: "solo los tests lo suben").
+      LOGIN_THROTTLE_LIMIT: 1000
+      SEED_ADMIN_CODE: ADM001
+      SEED_ADMIN_USERNAME: admin
+      SEED_ADMIN_PASSWORD: E2E-Clave-Temporal.1
+      PORT: 3000
+
+    steps:
+      - name: Checkout frontend
+        uses: actions/checkout@v4
+        with:
+          path: frontend
+
+      - name: Checkout backend
+        uses: actions/checkout@v4
+        with:
+          repository: webcores-col/WCSC001_AdministrativeNotes_V2
+          token: ${{ secrets.BACKEND_REPO_PAT }}
+          path: backend
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+
+      - name: Instalar, migrar, seedear y levantar el backend
+        working-directory: backend
+        run: |
+          npm ci
+          npx prisma migrate deploy
+          npm run db:seed
+          npm run build
+          nohup node dist/main.js > backend.log 2>&1 &
+          npx wait-on http://localhost:3000/health -t 60000
+
+      - name: Instalar dependencias del frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Instalar navegadores de Playwright
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Tests e2e (Playwright)
+        working-directory: frontend
+        env:
+          BACKEND_URL: http://localhost:3000
+          AUTH_SECRET: e2e-secret-solo-para-pipeline-0123456789abcdef=
+          AUTH_URL: http://localhost:3001
+          E2E_ADMIN_USERNAME: admin
+          E2E_ADMIN_PASSWORD: E2E-Clave-Temporal.1
+        run: npm run test:e2e
+
+      - name: Logs del backend (si algo falló)
+        if: failure()
+        run: cat backend/backend.log
+
+      - name: Subir reporte de Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 14

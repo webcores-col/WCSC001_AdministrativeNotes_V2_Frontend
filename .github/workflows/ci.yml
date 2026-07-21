@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+env:
+  BACKEND_URL: http://localhost:3000
+  AUTH_SECRET: ci-secret-solo-para-pipeline-0123456789abcdef=
+  AUTH_URL: http://localhost:3001
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      # Gate de seguridad: vulnerabilidades high/critical en dependencias de
+      # producción bloquean el merge (las de devDependencies no frenan CI) —
+      # mismo criterio que el backend.
+      - name: Auditoría de dependencias de producción
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests unitarios (con umbral de cobertura)
+        run: npm run test:coverage
+
+      - name: Build
+        run: npm run build

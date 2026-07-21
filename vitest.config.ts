@@ -7,6 +7,9 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
+    // tests/e2e/ son specs de Playwright (otro test runner) — excluirlos
+    // evita que Vitest los recoja también por el patrón *.spec.ts.
+    exclude: ['**/node_modules/**', 'tests/e2e/**'],
     globals: true,
     css: false,
     coverage: {

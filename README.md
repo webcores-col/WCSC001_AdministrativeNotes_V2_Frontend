@@ -53,6 +53,34 @@ npm run dev                   # http://localhost:3001
 | `npm run generate:api-types`    | Regenerar tipos desde `openapi/schema.json`                 |
 | `npm run fetch:api-schema`      | Actualizar `openapi/schema.json` desde un backend corriendo |
 
+## Testing e2e (Playwright)
+
+Cubre los flujos críticos con el backend real: login, alta de asociado,
+alta/filtro/eliminación de pagaré, gestión de usuarios (`tests/e2e/`).
+
+```bash
+# 1. Instalar el navegador (una sola vez; en Linux puede pedir sudo para
+#    dependencias del sistema — ver el error de Playwright si falta alguna)
+npx playwright install chromium
+
+# 2. Completar en .env.local (además de lo del inicio rápido):
+#    E2E_ADMIN_USERNAME / E2E_ADMIN_PASSWORD — el usuario ADMIN semilla
+#    del backend local (ver .env.example)
+
+# 3. Con el backend corriendo (el frontend lo levanta Playwright solo):
+npm run test:e2e
+```
+
+Cada corrida hace 2-3 peticiones reales a `POST /auth/login`. El backend
+limita a 5 intentos por minuto por IP — correr la suite completa varias
+veces seguidas en menos de un minuto puede toparse con el rate limiting
+real (no es un bug del test, ver el comentario en `tests/e2e/auth.spec.ts`).
+
+`.github/workflows/e2e.yml` la corre en CI (workflow separado, no
+bloqueante) construyendo el backend desde su código fuente — necesita el
+secret `BACKEND_REPO_PAT` (no configurado todavía, ver comentario en ese
+archivo).
+
 ## Contrato del API
 
 Este proyecto consume el contrato real de `WCSC001_AdministrativeNotes_V2`,
@@ -74,9 +102,10 @@ Swagger). `lib/api/http.ts` siempre resuelve la respuesta con
 
 ## Documentación
 
-| Documento                | Contenido                  |
-| ------------------------ | -------------------------- |
-| [`docs/adr/`](docs/adr/) | Decisiones de arquitectura |
+| Documento                                                | Contenido                                     |
+| -------------------------------------------------------- | --------------------------------------------- |
+| [`docs/PLAN_ARQUITECTURA.md`](docs/PLAN_ARQUITECTURA.md) | Roadmap por fases, qué está hecho y qué falta |
+| [`docs/adr/`](docs/adr/)                                 | Decisiones de arquitectura                    |
 
 ## Estructura
 
@@ -100,6 +129,7 @@ lib/
   permissions/ menu/ query/ hooks/ zod/ logging/ tracing/
 
 openapi/schema.json              # snapshot congelado del contrato real
+tests/e2e/                       # Playwright: flujos críticos con el backend real
 ```
 
 ## Convenciones
