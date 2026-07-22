@@ -10,35 +10,57 @@ export type MenuItem = {
   requiredPermission?: PermissionCode;
 };
 
+export type MenuSection = {
+  label: string;
+  items: MenuItem[];
+};
+
 /**
  * Un ítem por módulo real del backend (ver guía de integración, §8) — nada
  * más. `requiredPermission` decide visibilidad contra `permissions[]` de la
- * sesión real, no contra un rol hardcodeado.
+ * sesión real, no contra un rol hardcodeado. Las secciones son la jerarquía
+ * visual del sidebar (plan de diseño §5.1): operación diaria arriba,
+ * administración abajo.
  */
-export const MENU_ITEMS: MenuItem[] = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+export const MENU_SECTIONS: MenuSection[] = [
   {
-    label: 'Asociados',
-    href: '/asociados',
-    icon: Users,
-    requiredPermission: 'associates:read',
+    label: 'Menú principal',
+    items: [
+      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      {
+        label: 'Asociados',
+        href: '/asociados',
+        icon: Users,
+        requiredPermission: 'associates:read',
+      },
+      {
+        label: 'Pagarés',
+        href: '/pagares',
+        icon: FileText,
+        requiredPermission: 'notes:read',
+      },
+    ],
   },
   {
-    label: 'Pagarés',
-    href: '/pagares',
-    icon: FileText,
-    requiredPermission: 'notes:read',
-  },
-  {
-    label: 'Catálogos',
-    href: '/catalogos/tipos-identificacion',
-    icon: Tags,
-    requiredPermission: 'catalogs:read',
-  },
-  {
-    label: 'Usuarios',
-    href: '/usuarios',
-    icon: UserCog,
-    requiredPermission: 'users:read',
+    label: 'Administración',
+    items: [
+      {
+        label: 'Catálogos',
+        href: '/catalogos/tipos-identificacion',
+        icon: Tags,
+        requiredPermission: 'catalogs:read',
+      },
+      {
+        label: 'Usuarios',
+        href: '/usuarios',
+        icon: UserCog,
+        requiredPermission: 'users:read',
+      },
+    ],
   },
 ];
+
+/** Lista plana para lookups por ruta (p. ej. el título corto del topbar). */
+export const MENU_ITEMS: MenuItem[] = MENU_SECTIONS.flatMap(
+  (section) => section.items,
+);
