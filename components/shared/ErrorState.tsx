@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle } from 'lucide-react';
+import { ErrorCloud } from '@/components/shared/illustrations/ErrorCloud';
 import { Button } from '@/components/ui/button';
 
 /**
@@ -17,10 +17,12 @@ export function ErrorState({
   return (
     <div
       role="alert"
-      className="flex flex-col items-center justify-center gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-12 text-center"
+      className="flex flex-col items-center justify-center gap-3 rounded-xl border border-destructive/30 bg-card px-6 py-14 text-center"
     >
-      <AlertTriangle className="size-8 text-destructive" aria-hidden="true" />
-      <p className="text-sm font-medium text-destructive">{message}</p>
+      <ErrorCloud />
+      <p className="mx-auto max-w-[44ch] text-sm font-semibold text-destructive-soft-foreground">
+        {message}
+      </p>
       {onRetry && (
         <Button variant="outline" size="sm" onClick={onRetry}>
           Reintentar
