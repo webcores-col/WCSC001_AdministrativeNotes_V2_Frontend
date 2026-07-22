@@ -508,15 +508,18 @@ microcopia (§7) y los estándares de interacción (§8) aplican
 transversalmente desde 14.2 — cada fase redacta su copia con el
 vocabulario canónico al tocar cada pantalla.
 
-| Fase | Contenido                                                                                                            | Archivos principales                                       |
-| ---- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| 14.1 | **Fundaciones**: paleta primitiva + semánticos nuevos, radios 12px, escala de sombras, motion, `lib/format.ts`       | `app/globals.css`, `lib/format.ts`                         |
-| 14.2 | **Shell**: sidebar seccionado con activo `primary-soft`, topbar sticky, drawer móvil (`sheet`), rail `md`, skip-link | `components/layout/*`, `lib/menu/menu-definition.ts`       |
-| 14.3 | **Login talonario**: escena ink + card documento con troquel y eyebrow-folio                                         | `app/(public)/login/`, `components/domain/auth/LoginForm`  |
-| 14.4 | **Dashboard**: `PageHeader` compartido, acciones rápidas, stat cards con icon-tile, tabla de recientes               | `app/(app)/dashboard/`, `components/shared/PageHeader.tsx` |
-| 14.5 | **Patrón de listado**: card de tabla + toolbar + container queries (cards en contenedor angosto), folio en Pagarés   | `app/(app)/{asociados,pagares,usuarios,catalogos}/`        |
-| 14.6 | **Formularios y diálogos**: secciones en card, pies de acción, dialogs `radius-xl`, validación §8                    | `components/domain/*`                                      |
-| 14.7 | **Estados e ilustraciones**: SVG propios en Empty/Error, skeletons con silueta real, copia de vacíos §7              | `components/shared/`                                       |
+| Fase | Contenido                                                                                                            | Archivos principales                                       | Estado    |
+| ---- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | --------- |
+| 14.1 | **Fundaciones**: paleta primitiva + semánticos nuevos, radios 12px, escala de sombras, motion, `lib/format.ts`       | `app/globals.css`, `lib/format.ts`                         | ✅        |
+| 14.2 | **Shell**: sidebar seccionado con activo `primary-soft`, topbar sticky, drawer móvil (`sheet`), rail `md`, skip-link | `components/layout/*`, `lib/menu/menu-definition.ts`       | ✅        |
+| 14.3 | **Login talonario**: escena ink + card documento con troquel y eyebrow-folio                                         | `app/(public)/login/`, `components/domain/auth/LoginForm`  | ✅        |
+| 14.4 | **Dashboard**: `PageHeader` compartido, acciones rápidas, stat cards con icon-tile, tabla de recientes               | `app/(app)/dashboard/`, `components/shared/PageHeader.tsx` | ✅        |
+| 14.5 | **Patrón de listado**: card de tabla + toolbar + container queries (cards en contenedor angosto), folio en Pagarés   | `app/(app)/{asociados,pagares,usuarios,catalogos}/`        | Pendiente |
+| 14.6 | **Formularios y diálogos**: secciones en card, pies de acción, dialogs `radius-xl`, validación §8                    | `components/domain/*`                                      | Pendiente |
+| 14.7 | **Estados e ilustraciones**: SVG propios en Empty/Error, skeletons con silueta real, copia de vacíos §7              | `components/shared/`                                       | ✅        |
+
+La 14.7 se adelantó a 14.5/14.6 porque `components/shared/` se consume en
+toda la app: el beneficio es transversal y no depende del patrón de listado.
 
 Riesgos controlados: los e2e de Playwright seleccionan por rol/texto (no
 por clase) — el vocabulario canónico de §7 **puede cambiar textos que los
