@@ -53,7 +53,8 @@ describe('createAssociateSchema', () => {
 
 describe('updateAssociateSchema', () => {
   it('no admite numberIdentity (PK natural, no se edita)', () => {
-    const { numberIdentity: _omitted, ...rest } = validCreate;
+    const rest = { ...validCreate, numberIdentity: undefined };
+    delete rest.numberIdentity;
     const result = updateAssociateSchema.safeParse(rest);
     expect(result.success).toBe(true);
     // strip por defecto de zod: si llega, se descarta en vez de aceptarse.
