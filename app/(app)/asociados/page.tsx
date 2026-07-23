@@ -1,11 +1,17 @@
 'use client';
 
-import Link from 'next/link';
+import { Plus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { useState } from 'react';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ErrorState } from '@/components/shared/ErrorState';
+import { EmptyResults } from '@/components/shared/illustrations/EmptyResults';
 import { LoadingState } from '@/components/shared/LoadingState';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { TableCard } from '@/components/shared/TableCard';
+import { TablePagination } from '@/components/shared/TablePagination';
+import { UserAvatar } from '@/components/shared/UserAvatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,6 +47,11 @@ const SORT_OPTIONS = [
   { value: 'numberIdentity:desc', label: 'Identificación (descendente)' },
 ] as const;
 
+/*
+ * La identificación se muestra sin agrupar (cruda): los e2e la buscan por
+ * texto/rol con el valor exacto (getByRole('link', { name: numberIdentity })).
+ * El formato con puntos (lib/format.ts) queda para dashboard y detalle.
+ */
 export default function AsociadosPage() {
   const { data: session } = useSession();
   const [page, setPage] = useState(1);
@@ -58,17 +69,23 @@ export default function AsociadosPage() {
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Asociados</h1>
-        {canCreate && (
-          <Button asChild>
-            <Link href="/asociados/nuevo">Nuevo asociado</Link>
-          </Button>
-        )}
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title="Asociados"
+        description="Asociados registrados en la cooperativa."
+        actions={
+          canCreate && (
+            <Button asChild>
+              <Link href="/asociados/nuevo">
+                <Plus aria-hidden="true" />
+                Nuevo asociado
+              </Link>
+            </Button>
+          )
+        }
+      />
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-3">
         <Input
           placeholder="Buscar por nombre, apellido o identificación..."
           value={searchInput}
@@ -76,7 +93,7 @@ export default function AsociadosPage() {
             setPage(1);
             setSearchInput(event.target.value);
           }}
-          className="max-w-sm"
+          className="max-w-sm bg-card"
         />
         <Select
           value={sort}
@@ -85,7 +102,7 @@ export default function AsociadosPage() {
             setSort(value);
           }}
         >
-          <SelectTrigger className="w-64">
+          <SelectTrigger className="w-64 bg-card">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -96,6 +113,11 @@ export default function AsociadosPage() {
             ))}
           </SelectContent>
         </Select>
+        {query.isSuccess && (
+          <span className="ml-auto text-xs text-muted-foreground tabular-nums">
+            {total} resultados
+          </span>
+        )}
       </div>
 
       {query.isLoading && <LoadingState />}
@@ -110,76 +132,104 @@ export default function AsociadosPage() {
       {query.isSuccess && rows.length === 0 && (
         <EmptyState
           title="No hay asociados"
+          illustration={search ? <EmptyResults /> : undefined}
           description={
             search
-              ? 'No se encontraron asociados con ese criterio de búsqueda.'
+              ? `Sin resultados para “${search}”. Revise el número o intente con el nombre.`
               : 'Todavía no hay asociados registrados.'
           }
         />
       )}
 
       {query.isSuccess && rows.length > 0 && (
-        <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Identificación</TableHead>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Estado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((associate) => (
-                <TableRow key={associate.numberIdentity}>
-                  <TableCell>
-                    <Link
-                      href={`/asociados/${associate.numberIdentity}`}
-                      className="font-medium hover:underline"
-                    >
-                      {associate.numberIdentity}
-                    </Link>
-                  </TableCell>
-                  <TableCell>{associateFullName(associate)}</TableCell>
-                  <TableCell>{associate.identityTypeName}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        associate.status === 'ACTIVE' ? 'default' : 'secondary'
-                      }
-                    >
-                      {associate.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
-                    </Badge>
-                  </TableCell>
+        <TableCard
+          table={
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Identificación</TableHead>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Estado</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>
-              Página {page} de {totalPages} · {total} asociados
-            </span>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page <= 1}
-                onClick={() => setPage((current) => current - 1)}
+              </TableHeader>
+              <TableBody>
+                {rows.map((associate) => (
+                  <TableRow key={associate.numberIdentity}>
+                    <TableCell>
+                      <Link
+                        href={`/asociados/${associate.numberIdentity}`}
+                        className="font-mono text-sm font-medium tabular-nums hover:underline"
+                      >
+                        {associate.numberIdentity}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <span className="flex items-center gap-2.5">
+                        <UserAvatar
+                          name={associateFullName(associate)}
+                          className="size-7 text-[10px]"
+                        />
+                        {associateFullName(associate)}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {associate.identityTypeName}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          associate.status === 'ACTIVE'
+                            ? 'success'
+                            : 'secondary'
+                        }
+                      >
+                        {associate.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          }
+          cards={rows.map((associate) => (
+            <li key={associate.numberIdentity}>
+              <Link
+                href={`/asociados/${associate.numberIdentity}`}
+                className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-surface-soft"
               >
-                Anterior
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page >= totalPages}
-                onClick={() => setPage((current) => current + 1)}
-              >
-                Siguiente
-              </Button>
-            </div>
-          </div>
-        </>
+                <span className="flex min-w-0 items-center gap-3">
+                  <UserAvatar name={associateFullName(associate)} />
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-medium">
+                      {associateFullName(associate)}
+                    </span>
+                    <span className="block font-mono text-xs text-muted-foreground tabular-nums">
+                      {associate.numberIdentity} · {associate.identityTypeName}
+                    </span>
+                  </span>
+                </span>
+                <Badge
+                  variant={
+                    associate.status === 'ACTIVE' ? 'success' : 'secondary'
+                  }
+                >
+                  {associate.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
+                </Badge>
+              </Link>
+            </li>
+          ))}
+          footer={
+            <TablePagination
+              page={page}
+              totalPages={totalPages}
+              total={total}
+              noun="asociados"
+              onPrevious={() => setPage((current) => current - 1)}
+              onNext={() => setPage((current) => current + 1)}
+            />
+          }
+        />
       )}
     </div>
   );
