@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { AssociateFieldset } from '@/components/domain/associates/AssociateFieldset';
+import { FormActions } from '@/components/shared/FormActions';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -28,6 +29,9 @@ export function CreateAssociateForm() {
 
   const form = useForm<CreateAssociateInput>({
     resolver: zodResolver(createAssociateSchema),
+    // Valida al salir del campo y revalida al corregir (plan §8); en submit
+    // fallido react-hook-form enfoca el primer campo con error por defecto.
+    mode: 'onTouched',
     defaultValues: {
       numberIdentity: '',
       typeIdentity: '',
@@ -58,7 +62,7 @@ export function CreateAssociateForm() {
     <Form {...form}>
       <form
         onSubmit={onSubmit}
-        className="flex max-w-md flex-col gap-4"
+        className="grid gap-4 sm:grid-cols-2"
         noValidate
       >
         <FormField
@@ -75,9 +79,19 @@ export function CreateAssociateForm() {
           )}
         />
         <AssociateFieldset control={form.control} />
-        <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? 'Guardando…' : 'Registrar asociado'}
-        </Button>
+        <FormActions>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => router.back()}
+            disabled={mutation.isPending}
+          >
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={mutation.isPending}>
+            {mutation.isPending ? 'Guardando…' : 'Registrar asociado'}
+          </Button>
+        </FormActions>
       </form>
     </Form>
   );

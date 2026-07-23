@@ -36,14 +36,22 @@ export function DeleteNoteDialog({
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>¿Eliminar este pagaré?</DialogTitle>
-          <DialogDescription>
-            Deja de aparecer en las consultas, pero queda registrado quién lo
-            eliminó y cuándo. Puede volver a registrarse la misma combinación si
-            hace falta.
-          </DialogDescription>
-        </DialogHeader>
+        <div className="flex items-start gap-3">
+          <span
+            aria-hidden="true"
+            className="flex size-10 shrink-0 items-center justify-center rounded-md bg-destructive-soft text-destructive-soft-foreground"
+          >
+            <Trash2 className="size-[18px]" />
+          </span>
+          <DialogHeader>
+            <DialogTitle>¿Eliminar este pagaré?</DialogTitle>
+            <DialogDescription>
+              Deja de aparecer en las consultas, pero queda registrado quién lo
+              eliminó y cuándo. Puede volver a registrarse la misma combinación
+              si hace falta.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button" variant="outline">

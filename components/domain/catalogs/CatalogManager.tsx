@@ -51,6 +51,7 @@ export function CatalogManager({
 
   const form = useForm<CreateCatalogEntryInput>({
     resolver: zodResolver(createCatalogEntrySchema),
+    mode: 'onTouched',
     defaultValues: { code: '', name: '' },
   });
 

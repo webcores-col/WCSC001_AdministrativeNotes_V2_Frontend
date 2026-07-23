@@ -2,6 +2,14 @@
 
 import { useSession } from 'next-auth/react';
 import { ChangeMyPasswordForm } from '@/components/domain/users/ChangeMyPasswordForm';
+import { PageHeader } from '@/components/shared/PageHeader';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { ROLE_LABELS } from '@/lib/permissions/role-labels';
 
 export default function PerfilPage() {
@@ -9,19 +17,27 @@ export default function PerfilPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Mi perfil</h1>
-        {session && (
-          <p className="text-muted-foreground">
-            {session.user.names} {session.user.surnames} ·{' '}
-            {ROLE_LABELS[session.user.role] ?? session.user.role}
-          </p>
-        )}
-      </div>
-      <div>
-        <h2 className="mb-4 text-lg font-semibold">Cambiar contraseña</h2>
-        <ChangeMyPasswordForm />
-      </div>
+      <PageHeader
+        title="Mi perfil"
+        description={
+          session
+            ? `${session.user.names} ${session.user.surnames} · ${
+                ROLE_LABELS[session.user.role] ?? session.user.role
+              }`
+            : undefined
+        }
+      />
+      <Card className="max-w-lg">
+        <CardHeader>
+          <CardTitle>Cambiar contraseña</CardTitle>
+          <CardDescription>
+            Necesita su contraseña actual para confirmar el cambio.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChangeMyPasswordForm />
+        </CardContent>
+      </Card>
     </div>
   );
 }
