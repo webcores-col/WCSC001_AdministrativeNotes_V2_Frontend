@@ -17,12 +17,19 @@ on:
 # `prisma db seed` depende de `ts-node`, que no sobrevive esa poda —
 # confirmado leyendo su Dockerfile, no probado en runtime.
 #
-# PENDIENTE DEL USUARIO (no verificado — no se pudo probar sin pushear y
-# correr Actions real): crear un secret `BACKEND_REPO_PAT` en este repo
+# PENDIENTE DEL USUARIO: crear un secret `BACKEND_REPO_PAT` en este repo
 # (Settings → Secrets and variables → Actions) con un Personal Access
 # Token (classic, scope `repo`) que tenga lectura sobre
 # webcores-col/WCSC001_AdministrativeNotes_V2 — el GITHUB_TOKEN por
 # defecto de este repo no puede hacer checkout de otro repo privado.
+#
+# Confirmado en runtime (2026-07-23): sin ese secret, `actions/checkout`
+# falla el paso "Checkout backend" con "Input required and not supplied:
+# token" — `continue-on-error` en el job oculta esto en la vista de
+# gh run list/checks (queda en verde), pero el log del run muestra el
+# error igual. Los pasos siguientes se saltan explícitamente (`if:` de
+# abajo) para que el run quede realmente limpio y el motivo del skip sea
+# visible como aviso, en vez de un error de checkout críptico.
 jobs:
   e2e:
     runs-on: ubuntu-latest
@@ -44,6 +51,10 @@ jobs:
           --health-retries 10
 
     env:
+      # Booleano derivado del secret para poder usarlo en `if:` de step —
+      # GitHub Actions no admite referenciar `secrets.*` directamente en
+      # condicionales `if:`, solo a través del contexto `env`.
+      HAS_BACKEND_TOKEN: ${{ secrets.BACKEND_REPO_PAT != '' }}
       DATABASE_URL: postgresql://wcsc:wcsc_ci@localhost:5432/administrative_notes_e2e
       DIRECT_DATABASE_URL: postgresql://wcsc:wcsc_ci@localhost:5432/administrative_notes_e2e
       JWT_SECRET: e2e-secret-solo-para-pipeline-0123456789abcdef
@@ -58,12 +69,19 @@ jobs:
       PORT: 3000
 
     steps:
+      - name: Avisar si falta BACKEND_REPO_PAT
+        if: env.HAS_BACKEND_TOKEN != 'true'
+        run: |
+          echo "::warning::Falta el secret BACKEND_REPO_PAT (Settings → Secrets and variables → Actions). Se omite la suite e2e completa — ver el comentario al inicio de este workflow para crearlo."
+
       - name: Checkout frontend
+        if: env.HAS_BACKEND_TOKEN == 'true'
         uses: actions/checkout@v4
         with:
           path: frontend
 
       - name: Checkout backend
+        if: env.HAS_BACKEND_TOKEN == 'true'
         uses: actions/checkout@v4
         with:
           repository: webcores-col/WCSC001_AdministrativeNotes_V2
@@ -71,6 +89,7 @@ jobs:
           path: backend
 
       - uses: actions/setup-node@v4
+        if: env.HAS_BACKEND_TOKEN == 'true'
         with:
           node-version: 22
           cache: npm
@@ -79,6 +98,7 @@ jobs:
             backend/package-lock.json
 
       - name: Instalar, migrar, seedear y levantar el backend
+        if: env.HAS_BACKEND_TOKEN == 'true'
         working-directory: backend
         run: |
           npm ci
@@ -89,14 +109,17 @@ jobs:
           npx wait-on http://localhost:3000/health -t 60000
 
       - name: Instalar dependencias del frontend
+        if: env.HAS_BACKEND_TOKEN == 'true'
         working-directory: frontend
         run: npm ci
 
       - name: Instalar navegadores de Playwright
+        if: env.HAS_BACKEND_TOKEN == 'true'
         working-directory: frontend
         run: npx playwright install --with-deps chromium
 
       - name: Tests e2e (Playwright)
+        if: env.HAS_BACKEND_TOKEN == 'true'
         working-directory: frontend
         env:
           BACKEND_URL: http://localhost:3000
@@ -107,11 +130,11 @@ jobs:
         run: npm run test:e2e
 
       - name: Logs del backend (si algo falló)
-        if: failure()
+        if: failure() && env.HAS_BACKEND_TOKEN == 'true'
         run: cat backend/backend.log
 
       - name: Subir reporte de Playwright
-        if: always()
+        if: always() && env.HAS_BACKEND_TOKEN == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
