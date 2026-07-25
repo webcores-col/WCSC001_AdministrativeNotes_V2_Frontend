@@ -16,6 +16,13 @@ const badgeVariants = cva(
           'bg-destructive text-white focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40 [a&]:hover:bg-destructive/90',
         outline:
           'border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+        /* Variantes tintadas para estados de negocio (plan de diseño §4.2):
+         * fondo soft + texto del mismo hue — el color nunca va solo, el
+         * texto del badge siempre nombra el estado. */
+        success: 'bg-success-soft text-success-soft-foreground',
+        warning: 'bg-warning-soft text-warning-soft-foreground',
+        info: 'bg-info-soft text-info-soft-foreground',
+        danger: 'bg-destructive-soft text-destructive-soft-foreground',
         ghost: '[a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 [a&]:hover:underline',
       },

@@ -120,10 +120,11 @@ Swagger). `lib/api/http.ts` siempre resuelve la respuesta con
 
 ## Documentación
 
-| Documento                                                | Contenido                                     |
-| -------------------------------------------------------- | --------------------------------------------- |
-| [`docs/PLAN_ARQUITECTURA.md`](docs/PLAN_ARQUITECTURA.md) | Roadmap por fases, qué está hecho y qué falta |
-| [`docs/adr/`](docs/adr/)                                 | Decisiones de arquitectura                    |
+| Documento                                                | Contenido                                                        |
+| -------------------------------------------------------- | ---------------------------------------------------------------- |
+| [`docs/PLAN_ARQUITECTURA.md`](docs/PLAN_ARQUITECTURA.md) | Roadmap por fases, qué está hecho y qué falta                    |
+| [`docs/PLAN_DISENO_UI.md`](docs/PLAN_DISENO_UI.md)       | Sistema de diseño UI/UX v2: tokens, patrones y fases de rediseño |
+| [`docs/adr/`](docs/adr/)                                 | Decisiones de arquitectura                                       |
 
 ## Estructura
 

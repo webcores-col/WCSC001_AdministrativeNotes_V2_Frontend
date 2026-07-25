@@ -24,6 +24,7 @@ export function ChangeMyPasswordForm() {
   const mutation = useChangeMyPasswordMutation();
   const form = useForm<ChangeMyPasswordInput>({
     resolver: zodResolver(changeMyPasswordSchema),
+    mode: 'onTouched',
     defaultValues: {
       currentPassword: '',
       newPassword: '',

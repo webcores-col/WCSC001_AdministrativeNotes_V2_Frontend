@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { AssociateFieldset } from '@/components/domain/associates/AssociateFieldset';
+import { FormActions } from '@/components/shared/FormActions';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { getSurname2 } from '@/lib/api/associate-utils';
@@ -24,6 +25,7 @@ export function EditAssociateForm({
 
   const form = useForm<UpdateAssociateInput>({
     resolver: zodResolver(updateAssociateSchema),
+    mode: 'onTouched',
     defaultValues: {
       typeIdentity: associate.typeIdentity,
       names: associate.names,
@@ -48,13 +50,15 @@ export function EditAssociateForm({
     <Form {...form}>
       <form
         onSubmit={onSubmit}
-        className="flex max-w-md flex-col gap-4"
+        className="grid gap-4 sm:grid-cols-2"
         noValidate
       >
         <AssociateFieldset control={form.control} />
-        <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? 'Guardando…' : 'Guardar cambios'}
-        </Button>
+        <FormActions>
+          <Button type="submit" disabled={mutation.isPending}>
+            {mutation.isPending ? 'Guardando…' : 'Guardar cambios'}
+          </Button>
+        </FormActions>
       </form>
     </Form>
   );

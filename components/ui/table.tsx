@@ -4,6 +4,13 @@ import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
+/**
+ * Primitivos de tabla con el estilo del patrón de listado (plan de diseño
+ * §5.4): header sobre surface-soft con micro-etiquetas uppercase, filas
+ * altas con divisores sutiles y hover suave. La variante ink del header
+ * (solo Pagarés) se aplica por className en el uso, no aquí.
+ */
+
 function Table({ className, ...props }: React.ComponentProps<'table'>) {
   return (
     <div
@@ -23,7 +30,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<'thead'>) {
   return (
     <thead
       data-slot="table-header"
-      className={cn('[&_tr]:border-b', className)}
+      className={cn('bg-surface-soft [&_tr]:border-b', className)}
       {...props}
     />
   );
@@ -57,7 +64,7 @@ function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
     <tr
       data-slot="table-row"
       className={cn(
-        'border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted',
+        'border-b border-border-subtle transition-colors hover:bg-surface-soft has-aria-expanded:bg-surface-soft data-[state=selected]:bg-muted',
         className,
       )}
       {...props}
@@ -70,7 +77,7 @@ function TableHead({ className, ...props }: React.ComponentProps<'th'>) {
     <th
       data-slot="table-head"
       className={cn(
-        'h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
+        'h-11 px-4 text-left align-middle text-[11px] font-medium tracking-[0.08em] whitespace-nowrap text-muted-foreground uppercase [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
         className,
       )}
       {...props}
@@ -83,7 +90,7 @@ function TableCell({ className, ...props }: React.ComponentProps<'td'>) {
     <td
       data-slot="table-cell"
       className={cn(
-        'p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
+        'px-4 py-3 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]',
         className,
       )}
       {...props}

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { AssociatePicker } from '@/components/domain/associates/AssociatePicker';
+import { FormActions } from '@/components/shared/FormActions';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -34,6 +35,7 @@ export function CreateNoteForm() {
 
   const form = useForm<CreateNoteInput>({
     resolver: zodResolver(createNoteSchema),
+    mode: 'onTouched',
     defaultValues: {
       associateId: '',
       typeNote: '',
@@ -64,11 +66,7 @@ export function CreateNoteForm() {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={onSubmit}
-        className="flex max-w-md flex-col gap-4"
-        noValidate
-      >
+      <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <FormField
           control={form.control}
           name="associateId"
@@ -144,9 +142,19 @@ export function CreateNoteForm() {
           )}
         />
 
-        <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? 'Guardando…' : 'Registrar pagaré'}
-        </Button>
+        <FormActions>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => router.back()}
+            disabled={mutation.isPending}
+          >
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={mutation.isPending}>
+            {mutation.isPending ? 'Guardando…' : 'Registrar pagaré'}
+          </Button>
+        </FormActions>
       </form>
     </Form>
   );

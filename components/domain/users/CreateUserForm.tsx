@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { FormActions } from '@/components/shared/FormActions';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -36,6 +37,7 @@ export function CreateUserForm() {
 
   const form = useForm<CreateUserInput>({
     resolver: zodResolver(createUserSchema),
+    mode: 'onTouched',
     defaultValues: {
       code: '',
       names: '',
@@ -60,7 +62,7 @@ export function CreateUserForm() {
     <Form {...form}>
       <form
         onSubmit={onSubmit}
-        className="flex max-w-md flex-col gap-4"
+        className="grid gap-4 sm:grid-cols-2"
         noValidate
       >
         <FormField
@@ -152,9 +154,19 @@ export function CreateUserForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? 'Guardando…' : 'Crear usuario'}
-        </Button>
+        <FormActions>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => router.back()}
+            disabled={mutation.isPending}
+          >
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={mutation.isPending}>
+            {mutation.isPending ? 'Guardando…' : 'Crear usuario'}
+          </Button>
+        </FormActions>
       </form>
     </Form>
   );

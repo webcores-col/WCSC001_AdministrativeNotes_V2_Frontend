@@ -1,6 +1,7 @@
 'use client';
 
 import type { UseMutationResult } from '@tanstack/react-query';
+import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -35,13 +36,21 @@ export function DeleteCatalogEntryButton({
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>¿Eliminar &quot;{name}&quot;?</DialogTitle>
-          <DialogDescription>
-            Si hay asociados o pagarés que usan este código, el sistema rechaza
-            la eliminación en vez de dejar datos huérfanos.
-          </DialogDescription>
-        </DialogHeader>
+        <div className="flex items-start gap-3">
+          <span
+            aria-hidden="true"
+            className="flex size-10 shrink-0 items-center justify-center rounded-md bg-destructive-soft text-destructive-soft-foreground"
+          >
+            <Trash2 className="size-[18px]" />
+          </span>
+          <DialogHeader>
+            <DialogTitle>¿Eliminar &quot;{name}&quot;?</DialogTitle>
+            <DialogDescription>
+              Si hay asociados o pagarés que usan este código, el sistema
+              rechaza la eliminación en vez de dejar datos huérfanos.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button" variant="outline">

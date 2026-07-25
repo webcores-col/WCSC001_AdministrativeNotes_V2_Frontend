@@ -15,7 +15,17 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['lib/**/*.ts', 'lib/**/*.tsx'],
-      exclude: ['lib/api/generated/**', '**/*.d.ts'],
+      // Fuera del umbral unitario, con motivo:
+      // - lib/query/**: hooks de TanStack Query — son wiring de integración
+      //   (QueryClient + fetch real) y los cubren los e2e con backend real,
+      //   no tests unitarios con el fetch simulado.
+      // - lib/logging/**: singleton de pino (side effects al importar).
+      exclude: [
+        'lib/api/generated/**',
+        '**/*.d.ts',
+        'lib/query/**',
+        'lib/logging/**',
+      ],
       thresholds: {
         lines: 70,
         functions: 70,

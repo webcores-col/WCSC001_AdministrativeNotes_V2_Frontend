@@ -8,6 +8,7 @@ import { DeleteCatalogEntryButton } from '@/components/domain/catalogs/DeleteCat
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { LoadingState } from '@/components/shared/LoadingState';
+import { TableCard } from '@/components/shared/TableCard';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -50,6 +51,7 @@ export function CatalogManager({
 
   const form = useForm<CreateCatalogEntryInput>({
     resolver: zodResolver(createCatalogEntrySchema),
+    mode: 'onTouched',
     defaultValues: { code: '', name: '' },
   });
 
@@ -124,34 +126,40 @@ export function CatalogManager({
       )}
 
       {list.isSuccess && list.data.length > 0 && (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Código</TableHead>
-              <TableHead>Nombre</TableHead>
-              {canManage && (
-                <TableHead className="text-right">Acciones</TableHead>
-              )}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {list.data.map((entry) => (
-              <TableRow key={entry.code}>
-                <TableCell className="font-mono">{entry.code}</TableCell>
-                <TableCell>{entry.name}</TableCell>
-                {canManage && (
-                  <TableCell className="text-right">
-                    <DeleteCatalogEntryButton
-                      code={entry.code}
-                      name={entry.name}
-                      deleteMutation={deleteMutation}
-                    />
-                  </TableCell>
-                )}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <TableCard
+          table={
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Código</TableHead>
+                  <TableHead>Nombre</TableHead>
+                  {canManage && (
+                    <TableHead className="text-right">Acciones</TableHead>
+                  )}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {list.data.map((entry) => (
+                  <TableRow key={entry.code}>
+                    <TableCell className="font-mono text-xs tabular-nums">
+                      {entry.code}
+                    </TableCell>
+                    <TableCell>{entry.name}</TableCell>
+                    {canManage && (
+                      <TableCell className="text-right">
+                        <DeleteCatalogEntryButton
+                          code={entry.code}
+                          name={entry.name}
+                          deleteMutation={deleteMutation}
+                        />
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          }
+        />
       )}
     </div>
   );
