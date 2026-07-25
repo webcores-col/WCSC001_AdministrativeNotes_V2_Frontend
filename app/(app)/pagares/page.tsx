@@ -8,6 +8,7 @@ import { AssociatePicker } from '@/components/domain/associates/AssociatePicker'
 import { DeleteNoteDialog } from '@/components/domain/notes/DeleteNoteDialog';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ErrorState } from '@/components/shared/ErrorState';
+import { Folio } from '@/components/shared/Folio';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { TableCard } from '@/components/shared/TableCard';
@@ -29,15 +30,6 @@ import { hasPermission } from '@/lib/permissions/has-permission';
 import { useNotesQuery } from '@/lib/query/notes';
 
 const PAGE_SIZE = 20;
-
-/** Chip de folio — la firma del talonario (plan §3), solo en este módulo. */
-function Folio({ id }: { id: number }) {
-  return (
-    <span className="inline-flex items-center rounded-sm border border-border-subtle bg-surface-soft px-2 py-0.5 font-mono text-xs font-medium tracking-[0.02em] tabular-nums">
-      Nº {id}
-    </span>
-  );
-}
 
 export default function PagaresPage() {
   const { data: session } = useSession();
