@@ -431,7 +431,9 @@ solo se crea o se elimina.
   cambios); se agrega enlace «Volver a pagarés» (hoy no hay forma de
   regresar salvo el botón atrás del navegador).
 
-Pendiente de implementar — ver Fase 14.8 en §10.
+Implementado en Fase 14.8 (ver §10). El label del `PartyRow` va como
+eyebrow uppercase sobre el valor (no columna izquierda tipo formulario) —
+lectura vertical, más cercana a una ficha real que a un `<dl>`.
 
 ---
 
@@ -545,16 +547,16 @@ microcopia (§7) y los estándares de interacción (§8) aplican
 transversalmente desde 14.2 — cada fase redacta su copia con el
 vocabulario canónico al tocar cada pantalla.
 
-| Fase | Contenido                                                                                                                       | Archivos principales                                       | Estado                             |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------- |
-| 14.1 | **Fundaciones**: paleta primitiva + semánticos nuevos, radios 12px, escala de sombras, motion, `lib/format.ts`                  | `app/globals.css`, `lib/format.ts`                         | ✅                                 |
-| 14.2 | **Shell**: sidebar seccionado con activo `primary-soft`, topbar sticky, drawer móvil (`sheet`), rail `md`, skip-link            | `components/layout/*`, `lib/menu/menu-definition.ts`       | ✅                                 |
-| 14.3 | **Login talonario**: escena ink + card documento con troquel y eyebrow-folio                                                    | `app/(public)/login/`, `components/domain/auth/LoginForm`  | ✅                                 |
-| 14.4 | **Dashboard**: `PageHeader` compartido, acciones rápidas, stat cards con icon-tile, tabla de recientes                          | `app/(app)/dashboard/`, `components/shared/PageHeader.tsx` | ✅                                 |
-| 14.5 | **Patrón de listado**: card de tabla + toolbar + container queries (cards en contenedor angosto), folio en Pagarés              | `app/(app)/{asociados,pagares,usuarios,catalogos}/`        | ✅                                 |
-| 14.6 | **Formularios y diálogos**: secciones en card, pies de acción, dialogs `radius-xl`, validación §8                               | `components/domain/*`                                      | ✅                                 |
-| 14.7 | **Estados e ilustraciones**: SVG propios en Empty/Error, skeletons con silueta real, copia de vacíos §7                         | `components/shared/`                                       | ✅                                 |
-| 14.8 | **Detalle de pagaré**: patrón de página de detalle tipo ficha con troquel, enlaces a las partes, fix del id inválido — ver §5.8 | `app/(app)/pagares/[id]/page.tsx`                          | Shapeado, pendiente de implementar |
+| Fase | Contenido                                                                                                                       | Archivos principales                                       | Estado |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ------ |
+| 14.1 | **Fundaciones**: paleta primitiva + semánticos nuevos, radios 12px, escala de sombras, motion, `lib/format.ts`                  | `app/globals.css`, `lib/format.ts`                         | ✅     |
+| 14.2 | **Shell**: sidebar seccionado con activo `primary-soft`, topbar sticky, drawer móvil (`sheet`), rail `md`, skip-link            | `components/layout/*`, `lib/menu/menu-definition.ts`       | ✅     |
+| 14.3 | **Login talonario**: escena ink + card documento con troquel y eyebrow-folio                                                    | `app/(public)/login/`, `components/domain/auth/LoginForm`  | ✅     |
+| 14.4 | **Dashboard**: `PageHeader` compartido, acciones rápidas, stat cards con icon-tile, tabla de recientes                          | `app/(app)/dashboard/`, `components/shared/PageHeader.tsx` | ✅     |
+| 14.5 | **Patrón de listado**: card de tabla + toolbar + container queries (cards en contenedor angosto), folio en Pagarés              | `app/(app)/{asociados,pagares,usuarios,catalogos}/`        | ✅     |
+| 14.6 | **Formularios y diálogos**: secciones en card, pies de acción, dialogs `radius-xl`, validación §8                               | `components/domain/*`                                      | ✅     |
+| 14.7 | **Estados e ilustraciones**: SVG propios en Empty/Error, skeletons con silueta real, copia de vacíos §7                         | `components/shared/`                                       | ✅     |
+| 14.8 | **Detalle de pagaré**: patrón de página de detalle tipo ficha con troquel, enlaces a las partes, fix del id inválido — ver §5.8 | `app/(app)/pagares/[id]/page.tsx`                          | ✅     |
 
 Nota de 14.5: las identificaciones se muestran crudas (sin agrupar) en los
 listados porque los e2e las buscan por valor exacto; el formato con puntos
