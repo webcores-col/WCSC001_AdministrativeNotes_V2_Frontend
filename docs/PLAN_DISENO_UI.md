@@ -396,6 +396,43 @@ loading — en su CVA. El botón en loading conserva su ancho (spinner
 reemplaza al icono, no al texto) y queda `disabled`; la fila de tabla
 clicable tiene hover y focus-visible propios.
 
+### 5.8 Patrón de página de detalle (pagaré)
+
+Shapeado con `/impeccable shape` (2026-07-25) sobre `/pagares/[id]`, hoy un
+`<dl>` plano de 6 campos sin jerarquía ni enlaces. Es una vista **de solo
+lectura**: el contrato no tiene `notes:update`, un pagaré nunca se edita,
+solo se crea o se elimina.
+
+- **Encabezado tipo «letterhead»**: folio (`Nº {id}`, mismo chip mono del
+  listado) arriba, título «Pagaré Nº {id}», subtítulo con el tipo de
+  pagaré, y el **troquel** punteado debajo — el mismo motivo del header ink
+  de la tabla de Pagarés y de la card del login (§3), unificando la
+  identidad de «documento» en las tres superficies.
+- **Cuerpo en una sola card** (nunca cards anidadas): el deudor con más
+  peso visual (avatar de iniciales + nombre, enlazado a
+  `/asociados/[numberIdentity]` — hoy no existe ese enlace), luego
+  codeudor 1 y 2 con menor énfasis y el mismo enlace si existen («Sin
+  codeudor» si no), y al final — en tratamiento muted, como metadato —
+  fecha de registro y de última actualización (`updatedAt`, hoy no se
+  muestra).
+- **Sin monto**: confirmado en `NoteResponseDto` que un pagaré no tiene
+  campo de monto — no inventar uno aunque el nombre del dominio lo sugiera.
+- **Tipografía**: la solemnidad de la «ficha de documento legal» viene de
+  espaciado, peso y el troquel — nunca de una tipografía serif/display
+  nueva. Se mantiene Inter, igual que el resto de la app (criterio de
+  registro `product`, ver `PRODUCT.md`).
+- **Estado de borde real encontrado**: un `id` inválido en la URL (p. ej.
+  `/pagares/abc`) hoy deja la página en blanco — `useNoteQuery` nunca se
+  activa (`enabled: id !== undefined` con `id` ya convertido a
+  `undefined`), así que ninguna de las tres ramas (loading/error/success)
+  renderiza. Debe mostrar un estado explícito («No encontramos el pagaré
+  Nº {id}.»), nunca una pantalla vacía.
+- Acción «Eliminar» al pie con el diálogo destructivo ya existente (sin
+  cambios); se agrega enlace «Volver a pagarés» (hoy no hay forma de
+  regresar salvo el botón atrás del navegador).
+
+Pendiente de implementar — ver Fase 14.8 en §10.
+
 ---
 
 ## 6. Ilustraciones suaves (guía)
@@ -508,19 +545,20 @@ microcopia (§7) y los estándares de interacción (§8) aplican
 transversalmente desde 14.2 — cada fase redacta su copia con el
 vocabulario canónico al tocar cada pantalla.
 
-| Fase | Contenido                                                                                                            | Archivos principales                                       | Estado |
-| ---- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ------ |
-| 14.1 | **Fundaciones**: paleta primitiva + semánticos nuevos, radios 12px, escala de sombras, motion, `lib/format.ts`       | `app/globals.css`, `lib/format.ts`                         | ✅     |
-| 14.2 | **Shell**: sidebar seccionado con activo `primary-soft`, topbar sticky, drawer móvil (`sheet`), rail `md`, skip-link | `components/layout/*`, `lib/menu/menu-definition.ts`       | ✅     |
-| 14.3 | **Login talonario**: escena ink + card documento con troquel y eyebrow-folio                                         | `app/(public)/login/`, `components/domain/auth/LoginForm`  | ✅     |
-| 14.4 | **Dashboard**: `PageHeader` compartido, acciones rápidas, stat cards con icon-tile, tabla de recientes               | `app/(app)/dashboard/`, `components/shared/PageHeader.tsx` | ✅     |
-| 14.5 | **Patrón de listado**: card de tabla + toolbar + container queries (cards en contenedor angosto), folio en Pagarés   | `app/(app)/{asociados,pagares,usuarios,catalogos}/`        | ✅     |
-| 14.6 | **Formularios y diálogos**: secciones en card, pies de acción, dialogs `radius-xl`, validación §8                    | `components/domain/*`                                      | ✅     |
-| 14.7 | **Estados e ilustraciones**: SVG propios en Empty/Error, skeletons con silueta real, copia de vacíos §7              | `components/shared/`                                       | ✅     |
+| Fase | Contenido                                                                                                                       | Archivos principales                                       | Estado                             |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------- |
+| 14.1 | **Fundaciones**: paleta primitiva + semánticos nuevos, radios 12px, escala de sombras, motion, `lib/format.ts`                  | `app/globals.css`, `lib/format.ts`                         | ✅                                 |
+| 14.2 | **Shell**: sidebar seccionado con activo `primary-soft`, topbar sticky, drawer móvil (`sheet`), rail `md`, skip-link            | `components/layout/*`, `lib/menu/menu-definition.ts`       | ✅                                 |
+| 14.3 | **Login talonario**: escena ink + card documento con troquel y eyebrow-folio                                                    | `app/(public)/login/`, `components/domain/auth/LoginForm`  | ✅                                 |
+| 14.4 | **Dashboard**: `PageHeader` compartido, acciones rápidas, stat cards con icon-tile, tabla de recientes                          | `app/(app)/dashboard/`, `components/shared/PageHeader.tsx` | ✅                                 |
+| 14.5 | **Patrón de listado**: card de tabla + toolbar + container queries (cards en contenedor angosto), folio en Pagarés              | `app/(app)/{asociados,pagares,usuarios,catalogos}/`        | ✅                                 |
+| 14.6 | **Formularios y diálogos**: secciones en card, pies de acción, dialogs `radius-xl`, validación §8                               | `components/domain/*`                                      | ✅                                 |
+| 14.7 | **Estados e ilustraciones**: SVG propios en Empty/Error, skeletons con silueta real, copia de vacíos §7                         | `components/shared/`                                       | ✅                                 |
+| 14.8 | **Detalle de pagaré**: patrón de página de detalle tipo ficha con troquel, enlaces a las partes, fix del id inválido — ver §5.8 | `app/(app)/pagares/[id]/page.tsx`                          | Shapeado, pendiente de implementar |
 
-Todas las fases implementadas. Nota de 14.5: las identificaciones se
-muestran crudas (sin agrupar) en los listados porque los e2e las buscan
-por valor exacto; el formato con puntos queda para dashboard y detalle.
+Nota de 14.5: las identificaciones se muestran crudas (sin agrupar) en los
+listados porque los e2e las buscan por valor exacto; el formato con puntos
+queda para dashboard y detalle.
 
 Riesgos controlados: los e2e de Playwright seleccionan por rol/texto (no
 por clase) — el vocabulario canónico de §7 **puede cambiar textos que los
