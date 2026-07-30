@@ -83,36 +83,36 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <StatCard
-          title="Asociados"
-          foot="total registrados"
-          icon={Users}
-          value={recentAssociates.data?.meta?.total}
-          isLoading={recentAssociates.isLoading}
-          isError={recentAssociates.isError}
-          href="/asociados"
-        />
-        <StatCard
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr]">
+        <HeroStat
           title="Pagarés"
-          foot="notas administrativas"
+          foot="notas administrativas registradas"
           icon={FileText}
           value={notesCount.data?.meta?.total}
           isLoading={notesCount.isLoading}
           isError={notesCount.isError}
           href="/pagares"
         />
-        {canReadUsers && (
-          <StatCard
-            title="Usuarios"
-            foot="con acceso al sistema"
-            icon={UserCog}
-            value={usersCount.data?.meta?.total}
-            isLoading={usersCount.isLoading}
-            isError={usersCount.isError}
-            href="/usuarios"
+        <Card className="gap-0 divide-y divide-border-subtle overflow-hidden py-0">
+          <CompactStat
+            title="Asociados"
+            icon={Users}
+            value={recentAssociates.data?.meta?.total}
+            isLoading={recentAssociates.isLoading}
+            isError={recentAssociates.isError}
+            href="/asociados"
           />
-        )}
+          {canReadUsers && (
+            <CompactStat
+              title="Usuarios"
+              icon={UserCog}
+              value={usersCount.data?.meta?.total}
+              isLoading={usersCount.isLoading}
+              isError={usersCount.isError}
+              href="/usuarios"
+            />
+          )}
+        </Card>
       </div>
 
       <section className="flex flex-col gap-4">
@@ -178,7 +178,12 @@ export default function DashboardPage() {
   );
 }
 
-function StatCard({
+/**
+ * Métrica protagonista del resumen: Pagarés es el objeto central del
+ * negocio (posicionamiento del producto), así que lleva más peso visual
+ * que Asociados/Usuarios en vez de repetir la misma card tres veces.
+ */
+function HeroStat({
   title,
   foot,
   icon: Icon,
@@ -200,22 +205,22 @@ function StatCard({
       href={href}
       className="group rounded-xl focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
     >
-      <Card className="h-full gap-0 py-5 transition-[transform,box-shadow] duration-200 ease-out-soft group-hover:shadow-md motion-safe:group-hover:-translate-y-0.5">
-        <CardHeader className="gap-3">
-          <div className="flex items-center gap-3">
+      <Card className="h-full gap-0 py-7 transition-[transform,box-shadow] duration-200 ease-out-soft group-hover:shadow-md motion-safe:group-hover:-translate-y-0.5">
+        <CardHeader className="gap-4">
+          <div className="flex items-center gap-3.5">
             <span
               aria-hidden="true"
-              className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary-soft-foreground"
+              className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-foreground"
             >
-              <Icon className="size-[18px]" />
+              <Icon className="size-5" />
             </span>
-            <CardDescription className="text-[11px] font-medium tracking-[0.08em] uppercase">
+            <CardDescription className="text-xs font-medium tracking-[0.08em] uppercase">
               {title}
             </CardDescription>
           </div>
-          <CardTitle className="text-[clamp(1.75rem,1.4rem+1.4vw,2.25rem)] tracking-tight tabular-nums">
+          <CardTitle className="text-[clamp(2.25rem,1.7rem+2.4vw,3.25rem)] tracking-tight tabular-nums">
             {isLoading ? (
-              <Skeleton className="h-9 w-16" />
+              <Skeleton className="h-11 w-24" />
             ) : isError ? (
               '—'
             ) : (
@@ -225,6 +230,45 @@ function StatCard({
           <CardDescription>{foot}</CardDescription>
         </CardHeader>
       </Card>
+    </Link>
+  );
+}
+
+/** Fila compacta para las métricas secundarias, agrupadas en una sola card. */
+function CompactStat({
+  title,
+  icon: Icon,
+  value,
+  isLoading,
+  isError,
+  href,
+}: {
+  title: string;
+  icon: LucideIcon;
+  value: number | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  href: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-surface-soft"
+    >
+      <span className="flex items-center gap-3">
+        <span
+          aria-hidden="true"
+          className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary-soft-foreground"
+        >
+          <Icon className="size-4" />
+        </span>
+        <span className="text-sm font-medium text-muted-foreground">
+          {title}
+        </span>
+      </span>
+      <span className="text-xl font-semibold tabular-nums">
+        {isLoading ? <Skeleton className="h-6 w-10" /> : isError ? '—' : value}
+      </span>
     </Link>
   );
 }

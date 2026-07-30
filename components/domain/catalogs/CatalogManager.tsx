@@ -69,45 +69,52 @@ export function CatalogManager({
     <div className="flex flex-col gap-4">
       <h2 className="text-lg font-semibold">{title}</h2>
 
-      {canManage && (
-        <Form {...form}>
-          <form
-            onSubmit={onSubmit}
-            className="flex flex-wrap items-end gap-2"
-            noValidate
-          >
-            <FormField
-              control={form.control}
-              name="code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Código</FormLabel>
-                  <FormControl>
-                    <Input {...field} className="w-32" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre</FormLabel>
-                  <FormControl>
-                    <Input {...field} className="w-64" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Agregando…' : 'Agregar'}
-            </Button>
-          </form>
-        </Form>
-      )}
+      <div className="flex flex-wrap items-end gap-2">
+        {canManage && (
+          <Form {...form}>
+            <form
+              onSubmit={onSubmit}
+              className="flex flex-wrap items-end gap-2"
+              noValidate
+            >
+              <FormField
+                control={form.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Código</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="w-32" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre</FormLabel>
+                    <FormControl>
+                      <Input {...field} className="w-64" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" disabled={createMutation.isPending}>
+                {createMutation.isPending ? 'Agregando…' : 'Agregar'}
+              </Button>
+            </form>
+          </Form>
+        )}
+        {list.isSuccess && (
+          <span className="ml-auto self-center text-xs text-muted-foreground tabular-nums">
+            {list.data.length} {list.data.length === 1 ? 'entrada' : 'entradas'}
+          </span>
+        )}
+      </div>
 
       {list.isLoading && <LoadingState />}
 

@@ -60,25 +60,25 @@ export function CreateAssociateForm() {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={onSubmit}
-        className="grid gap-4 sm:grid-cols-2"
-        noValidate
-      >
-        <FormField
+      <form onSubmit={onSubmit} className="flex flex-col gap-6" noValidate>
+        <AssociateFieldset
           control={form.control}
-          name="numberIdentity"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Número de identificación</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          identificationExtra={
+            <FormField
+              control={form.control}
+              name="numberIdentity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Número de identificación</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          }
         />
-        <AssociateFieldset control={form.control} />
         <FormActions>
           <Button
             type="button"

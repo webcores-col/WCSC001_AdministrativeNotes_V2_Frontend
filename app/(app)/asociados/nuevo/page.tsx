@@ -1,6 +1,5 @@
 import { CreateAssociateForm } from '@/components/domain/associates/CreateAssociateForm';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent } from '@/components/ui/card';
 
 export default function NuevoAsociadoPage() {
   return (
@@ -9,11 +8,9 @@ export default function NuevoAsociadoPage() {
         title="Nuevo asociado"
         description="Registre los datos de identificación del asociado."
       />
-      <Card className="max-w-2xl">
-        <CardContent>
-          <CreateAssociateForm />
-        </CardContent>
-      </Card>
+      <div className="max-w-2xl">
+        <CreateAssociateForm />
+      </div>
     </div>
   );
 }
