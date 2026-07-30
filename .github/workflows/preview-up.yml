@@ -66,7 +66,7 @@ jobs:
         # a veces confunde la raíz del workspace si hay más de un
         # lockfile visible), por eso se busca en vez de asumir la ruta.
         run: |
-          SERVER_JS="$(find .next/standalone -maxdepth 6 -iname server.js | head -1)"
+          SERVER_JS="$(find .next/standalone -maxdepth 6 -iname server.js -not -path '*/node_modules/*' | head -1)"
           if [ -z "$SERVER_JS" ]; then
             echo "::error::No se encontró .next/standalone/server.js después del build."
             exit 1
