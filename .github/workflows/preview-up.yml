@@ -29,11 +29,15 @@ jobs:
   preview-up:
     runs-on: [self-hosted, local-preview]
     steps:
-      - name: Verificar que el puerto esté libre
+      - name: Verificar que no haya un preview corriendo ya
         run: |
+          if systemctl --user is-active --quiet wcsc-preview 2>/dev/null; then
+            echo "::error::Ya hay un preview corriendo (unidad systemd 'wcsc-preview'). Corré 'Preview local (destruir)' primero."
+            exit 1
+          fi
           PORT="${{ inputs.port }}"
           if fuser "$PORT/tcp" >/dev/null 2>&1; then
-            echo "::error::Ya hay algo escuchando en el puerto $PORT (¿un preview previo? Corré 'Preview local (destruir)' primero, o elegí otro puerto)."
+            echo "::error::El puerto $PORT ya está ocupado por otra cosa (no por 'wcsc-preview'). Elegí otro puerto o liberalo a mano."
             exit 1
           fi
 
@@ -77,21 +81,26 @@ jobs:
           cp -r .next/static "$BASE_DIR/.next/static"
           echo "SERVER_JS=$SERVER_JS" >> "$GITHUB_ENV"
 
-      - name: Arrancar el preview (detached, sobrevive al fin del job)
-        # No se guarda el PID: el server standalone de Next re-execa un
-        # proceso hijo con otro PID, así que el kill del teardown apunta
-        # al puerto (fuser), no a un PID capturado acá.
-        env:
-          PORT: ${{ inputs.port }}
-          HOSTNAME: 0.0.0.0
-          BACKEND_URL: http://localhost:3000
-          AUTH_URL: http://localhost:${{ inputs.port }}
-          AUTH_TRUST_HOST: 'true'
-          LOG_LEVEL: info
+      - name: Arrancar el preview (systemd --user, sobrevive al fin del job)
+        # `setsid nohup ... &` no alcanza: el runner corre cada job dentro
+        # de su propio cgroup y lo destruye completo al terminar,
+        # matando cualquier descendiente aunque haya cambiado de sesión
+        # (confirmado: el server arrancaba bien, `wait-on` lo confirmaba,
+        # y aun así moría apenas terminaba el job). systemd-run --user
+        # crea una unidad transient en el cgroup del usuario, fuera del
+        # árbol de procesos del job — sobrevive a que el job termine.
         run: |
-          export AUTH_SECRET="$(openssl rand -base64 32)"
-          setsid nohup node "$SERVER_JS" > /tmp/wcsc-preview.log 2>&1 < /dev/null &
-          disown
+          AUTH_SECRET="$(openssl rand -base64 32)"
+          systemd-run --user --unit=wcsc-preview --collect \
+            --working-directory="$PWD" \
+            --setenv=PORT="${{ inputs.port }}" \
+            --setenv=HOSTNAME=0.0.0.0 \
+            --setenv=BACKEND_URL=http://localhost:3000 \
+            --setenv=AUTH_URL="http://localhost:${{ inputs.port }}" \
+            --setenv=AUTH_TRUST_HOST=true \
+            --setenv=AUTH_SECRET="$AUTH_SECRET" \
+            --setenv=LOG_LEVEL=info \
+            -- node "$SERVER_JS"
 
       - name: Esperar a que responda
         run: npx wait-on -t 60000 "http://localhost:${{ inputs.port }}/login"
