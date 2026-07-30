@@ -19,8 +19,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Pagarés — COINTRAMIN',
-    template: '%s · Pagarés COINTRAMIN',
+    default: 'COINTRAMIN',
+    template: '%s · COINTRAMIN',
   },
   description:
     'Gestión de asociados y pagarés (notas administrativas) de COINTRAMIN.',

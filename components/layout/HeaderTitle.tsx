@@ -12,7 +12,7 @@ export function HeaderTitle() {
 
   return (
     <span className="text-sm font-semibold">
-      {label ?? 'Pagarés COINTRAMIN'}
+      {label ?? 'COINTRAMIN'}
     </span>
   );
 }
