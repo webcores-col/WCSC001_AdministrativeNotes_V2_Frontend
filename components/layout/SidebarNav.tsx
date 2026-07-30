@@ -76,13 +76,15 @@ export function SidebarBrand({
         aria-hidden="true"
         className="flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-primary-soft text-sm font-bold text-primary-soft-foreground"
       >
-        P
+        C
       </span>
-      <span className={cn('leading-tight', collapsible && 'max-lg:hidden')}>
-        <span className="block text-sm font-semibold">Pagarés</span>
-        <span className="block text-[11px] text-muted-foreground">
-          COINTRAMIN
-        </span>
+      <span
+        className={cn(
+          'text-sm font-semibold tracking-tight',
+          collapsible && 'max-lg:hidden',
+        )}
+      >
+        COINTRAMIN
       </span>
     </div>
   );

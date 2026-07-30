@@ -21,6 +21,14 @@ como color de marca — no se hereda ninguna paleta externa.
 > material de diseño, no solo el color; (4) el responsive de tablas pasa a
 > **container queries** y la tipografía de títulos a escala fluida.
 
+> **Revisión v3** — el login (§5.2) pasa de la escena oscura de talonario a
+> una escena corporativa premium (card blanca sobre cinta abstracta en el
+> hue de marca), tras validar con el usuario que la v1/v2 se sentía plana;
+> el naming de marca se simplifica a **"COINTRAMIN"** en el lockup visual
+> (sidebar, login, metadata) — "Pagarés" se conserva como término de
+> dominio, no como nombre de marca. Esta dirección es la base del sistema
+> de ahora en adelante, no una variante a seguir explorando.
+
 ---
 
 ## 1. Diagnóstico del estado actual
@@ -99,9 +107,9 @@ y reproducibles en CSS puro:
   («Pagaré PG-2026-0341 creado»).
 - **El troquel.** Una línea punteada de perforación (1px, guiones cortos,
   color del texto al 25%) marca las superficies que «emiten documento»:
-  bajo el header ink de la tabla de Pagarés, en el borde superior de la
-  card del login (el formulario es el documento que se desprende del
-  talonario) y en el encabezado de la card de detalle de un pagaré.
+  bajo el header ink de la tabla de Pagarés y en el encabezado de la card
+  de detalle de un pagaré. (El login lo llevó en v1/v2; en v3 §5.2 ya no
+  usa la firma del talonario — pasó a una escena corporativa premium.)
 
 Reglas de contención: **máximo un troquel por vista**, nunca en cards de
 datos genéricas, nunca como decoración de secciones. Si un elemento nuevo
@@ -255,7 +263,10 @@ ya provisto por tw-animate-css), skeleton con `animate-pulse`. Todo bajo
 **Sidebar** (264px expandido):
 
 - Bloque de marca arriba: logotipo/monograma en tile `primary-soft`
-  redondeado + "Pagarés COINTRAMIN".
+  redondeado + "COINTRAMIN" (revisión v3: se retira "Pagarés" del lockup
+  visual — sigue siendo el término de dominio correcto para el módulo y
+  los documentos, pero no es el nombre de la organización dueña del
+  sistema).
 - Secciones con micro-etiqueta uppercase: `MENÚ PRINCIPAL` (Dashboard,
   Asociados, Pagarés) y `ADMINISTRACIÓN` (Catálogos, Usuarios) — la
   partición se declara en `lib/menu/menu-definition.ts` con un campo
@@ -288,29 +299,49 @@ secciones. Primer elemento tabulable del shell: skip-link «Ir al
 contenido» (visible solo con foco), destino `#main` con
 `scroll-margin-top` para que el topbar sticky no lo tape.
 
-### 5.2 Login (identidad de marca)
+### 5.2 Login (identidad de marca) — revisión v3
 
-Escena oscura de marca — el patrón de la referencia traducido al verde
-petróleo y a la firma del talonario (§3):
+Reemplaza la escena oscura de talonario de v1/v2 (fondo `--ink` + formas
+orgánicas + troquel) por una escena **corporativa premium**: card blanca
+flotante sobre una cinta abstracta pictórica en la identidad propia del
+proyecto. Decisión tomada con el usuario a partir de una referencia externa
+(login de Stripe: card blanca sobre pintura abstracta a pantalla completa),
+adaptada al hue 175 de marca en vez de heredar su paleta — **esta dirección
+es ahora la base del sistema de login**, no una variante más.
 
-- Fondo `--ink` a pantalla completa con 2 formas orgánicas SVG en
-  `--ink-soft`/`--ink-softer` (absolutas, `overflow-hidden`, `aria-hidden`)
-  y 2–3 puntos suaves al 30% — mismos motivos decorativos que las
-  ilustraciones (§6), sin glifos prestados de la referencia.
-- Marca centrada arriba de la card (wordmark blanco).
-- Card `w-full max-w-sm`, fondo `--ink-soft`, `radius-2xl`, `shadow-lg`,
-  sin borde, con **troquel en el borde superior** y eyebrow-folio
-  («ACCESO · PAGARÉS», micro-etiqueta) — el formulario es el documento que
-  se desprende del talonario.
-- Inputs sobre `--ink-softer` con micro-etiqueta uppercase dentro del campo
-  (label 11px + valor), texto blanco, focus ring `--green-400`.
-- CTA pill blanco con texto ink y flecha en `--green-500`; hover
-  `shadow-brand`.
-- Errores de credenciales: mismo patrón actual (mensaje bajo el form),
-  sobre fondo `destructive/15` con texto claro legible en oscuro.
+- Fondo `bg-background` (canvas claro) a pantalla completa.
+- Cinta decorativa: 2–3 formas circulares grandes, `blur` fuerte (55–110px),
+  `linear-gradient`/`radial-gradient` recorriendo `--ink` → `--green-600` →
+  `--green-400` → `--green-100`, ancladas arriba a la derecha (y una
+  tercera, opcional en `sm+`, abajo a la izquierda en `--green-200`).
+  Contenidas en un wrapper `absolute inset-0 overflow-hidden aria-hidden`,
+  igual que las formas orgánicas que reemplazan.
+- **Recorte responsive obligatorio**: tamaño, posición y blur van en
+  breakpoints (`size-[260px] ... sm:size-[900px]`, etc.), nunca en un solo
+  valor fijo — un blob grande sin variante móvil cubre toda la pantalla de
+  color sólido en viewports angostos.
+- Marca centrada arriba de la card: tile `primary-soft` + wordmark
+  "COINTRAMIN" (ver nota de naming en §5.1).
+- Card `w-full max-w-sm`, `bg-card`, `radius-2xl`, `border-border-subtle`,
+  `shadow-lg`, `p-8`. Sin troquel ni eyebrow-folio — la firma del talonario
+  (§3) queda reservada a la tabla de Pagarés y al detalle de pagaré, no al
+  login.
+- Formulario: mismo patrón `Form`/`FormField` de shadcn que el resto de la
+  app (label arriba, `Input` estándar) — no campos a medida. El enlace
+  "¿Olvidó su contraseña?" vive en la misma fila que el label de
+  Contraseña; el checkbox "Mantener sesión iniciada" va solo, debajo. El
+  backend no expone reseteo de contraseña ni sesiones extendidas: el
+  enlace revela un mensaje inline ("contacte a un administrador") en vez
+  de navegar, y el checkbox es entrada visual sin efecto medible hasta que
+  el backend soporte alguno de los dos.
+- CTA sólido `--primary` a todo el ancho (no pill, sin flecha) — más
+  corporativo que el CTA-pill con acento de la v1/v2.
+- Validación del formulario en `onTouched` (alineado con el estándar
+  transversal de §8; la v1/v2 solo validaba en submit).
 
-Es la **única** pantalla oscura de la v1 (el dark mode global sigue fuera de
-alcance); usa tokens `--ink*` directamente, sin activar `.dark`.
+Fue el único screen con tratamiento oscuro en v1/v2; en v3 pasa a ser claro
+y coherente con el resto de la app — el dark mode global sigue fuera de
+alcance.
 
 ### 5.3 Dashboard
 
@@ -512,11 +543,12 @@ vocabulario canónico al tocar cada pantalla.
 | ---- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ------ |
 | 14.1 | **Fundaciones**: paleta primitiva + semánticos nuevos, radios 12px, escala de sombras, motion, `lib/format.ts`       | `app/globals.css`, `lib/format.ts`                         | ✅     |
 | 14.2 | **Shell**: sidebar seccionado con activo `primary-soft`, topbar sticky, drawer móvil (`sheet`), rail `md`, skip-link | `components/layout/*`, `lib/menu/menu-definition.ts`       | ✅     |
-| 14.3 | **Login talonario**: escena ink + card documento con troquel y eyebrow-folio                                         | `app/(public)/login/`, `components/domain/auth/LoginForm`  | ✅     |
+| 14.3 | ~~Login talonario~~: escena ink + card documento con troquel y eyebrow-folio (reemplazada por 14.8)                  | `app/(public)/login/`, `components/domain/auth/LoginForm`  | ✅     |
 | 14.4 | **Dashboard**: `PageHeader` compartido, acciones rápidas, stat cards con icon-tile, tabla de recientes               | `app/(app)/dashboard/`, `components/shared/PageHeader.tsx` | ✅     |
 | 14.5 | **Patrón de listado**: card de tabla + toolbar + container queries (cards en contenedor angosto), folio en Pagarés   | `app/(app)/{asociados,pagares,usuarios,catalogos}/`        | ✅     |
 | 14.6 | **Formularios y diálogos**: secciones en card, pies de acción, dialogs `radius-xl`, validación §8                    | `components/domain/*`                                      | ✅     |
 | 14.7 | **Estados e ilustraciones**: SVG propios en Empty/Error, skeletons con silueta real, copia de vacíos §7              | `components/shared/`                                       | ✅     |
+| 14.8 | **Login corporativo premium** (revisión v3, reemplaza 14.3): card flotante sobre cinta abstracta de marca, checkbox "mantener sesión" + enlace "olvidó su contraseña" (sin flujo real, backend no lo soporta), validación `onTouched`; naming unificado a "COINTRAMIN" en marca/sidebar/topbar/metadata | `app/(public)/login/`, `components/domain/auth/{LoginForm,use-login-form}.ts`, `components/layout/{SidebarNav,HeaderTitle}.tsx`, `app/layout.tsx` | ✅ |
 
 Todas las fases implementadas. Nota de 14.5: las identificaciones se
 muestran crudas (sin agrupar) en los listados porque los e2e las buscan
