@@ -40,7 +40,8 @@ auto-hospedado, disparado a mano.
    la rama (`ref`) que querés revisar.
 3. Cuando el job termine, va a decir `Preview arriba en http://localhost:3005`
    (o el puerto que hayas puesto) — abrilo en tu navegador.
-4. Cuando termines: Actions → **Preview local (destruir)** → Run workflow.
+4. Cuando termines: Actions → **Preview local (destruir)** → Run workflow
+   (con el mismo `port` que usaste al levantarlo, si no fue el default).
 
 Solo puede haber un preview a la vez (si corrés "levantar" con uno ya
 activo, falla con un mensaje claro pidiendo destruir el anterior primero).
