@@ -1,0 +1,29 @@
+name: Preview local (destruir)
+
+# Contraparte de "Preview local (levantar)": mata lo que esté escuchando
+# en el puerto del preview. No toca el backend ni su base de datos — esos
+# son tu entorno de desarrollo persistente, no algo efímero.
+on:
+  workflow_dispatch:
+    inputs:
+      port:
+        description: 'Puerto del preview a destruir'
+        required: false
+        default: '3005'
+
+permissions:
+  contents: read
+
+jobs:
+  preview-down:
+    runs-on: [self-hosted, local-preview]
+    steps:
+      - name: Detener el preview
+        run: |
+          PORT="${{ inputs.port }}"
+          if fuser -k "$PORT/tcp" 2>/dev/null; then
+            sleep 1
+            echo "::notice::Preview en el puerto $PORT detenido."
+          else
+            echo "::notice::No había nada escuchando en el puerto $PORT — nada que destruir."
+          fi
