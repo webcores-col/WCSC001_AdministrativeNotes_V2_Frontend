@@ -1,0 +1,80 @@
+name: Preview local (levantar)
+
+# Levanta el frontend de una rama/PR contra el backend local que ya tenés
+# corriendo (wcsc-v2-api en :3000 + wcsc-v2-db), para revisarlo en el
+# navegador antes de mergear a main. Ver docs/PREVIEW_LOCAL.md.
+#
+# Solo se dispara a mano (workflow_dispatch): el runner auto-hospedado
+# "local-preview" ejecuta este workflow en tu propia máquina, así que
+# nunca debe correr solo porque alguien abrió o actualizó un PR.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Rama a previsualizar (ej. feat/mi-rama)'
+        required: true
+      port:
+        description: 'Puerto local para el preview'
+        required: false
+        default: '3005'
+
+concurrency:
+  group: local-preview
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  preview-up:
+    runs-on: [self-hosted, local-preview]
+    steps:
+      - name: Verificar que no haya un preview corriendo ya
+        run: |
+          if [ -f /tmp/wcsc-preview.pid ] && kill -0 "$(cat /tmp/wcsc-preview.pid)" 2>/dev/null; then
+            echo "::error::Ya hay un preview corriendo (PID $(cat /tmp/wcsc-preview.pid)). Corré 'Preview local (destruir)' primero."
+            exit 1
+          fi
+          rm -f /tmp/wcsc-preview.pid /tmp/wcsc-preview.log
+
+      - name: Verificar que el backend local esté arriba
+        run: |
+          if ! curl -fsS --max-time 3 http://localhost:3000/health >/dev/null 2>&1; then
+            echo "::error::No se pudo contactar el backend local en http://localhost:3000/health. Levantalo (wcsc-v2-api / npm run start:dev) antes de correr este workflow."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Build de producción
+        run: npm run build
+
+      - name: Arrancar el preview (detached, sobrevive al fin del job)
+        env:
+          PORT: ${{ inputs.port }}
+          BACKEND_URL: http://localhost:3000
+          AUTH_URL: http://localhost:${{ inputs.port }}
+          AUTH_TRUST_HOST: 'true'
+          LOG_LEVEL: info
+        run: |
+          export AUTH_SECRET="$(openssl rand -base64 32)"
+          setsid nohup npx next start -p "$PORT" > /tmp/wcsc-preview.log 2>&1 < /dev/null &
+          echo $! > /tmp/wcsc-preview.pid
+          disown
+
+      - name: Esperar a que responda
+        run: npx wait-on -t 60000 "http://localhost:${{ inputs.port }}/login"
+
+      - name: Listo
+        run: |
+          echo "::notice::Preview arriba en http://localhost:${{ inputs.port }} (rama: ${{ inputs.ref }}), contra el backend local en :3000. Corré 'Preview local (destruir)' cuando termines de revisarlo."

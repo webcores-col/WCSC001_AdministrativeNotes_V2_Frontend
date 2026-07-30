@@ -1,0 +1,31 @@
+name: Preview local (destruir)
+
+# Contraparte de "Preview local (levantar)": mata el proceso del preview
+# detached en el runner local. No toca el backend ni su base de datos —
+# esos son tu entorno de desarrollo persistente, no algo efímero.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview-down:
+    runs-on: [self-hosted, local-preview]
+    steps:
+      - name: Detener el preview
+        run: |
+          if [ -f /tmp/wcsc-preview.pid ]; then
+            PID="$(cat /tmp/wcsc-preview.pid)"
+            if kill -0 "$PID" 2>/dev/null; then
+              kill "$PID" 2>/dev/null || true
+              sleep 2
+              kill -9 "$PID" 2>/dev/null || true
+              echo "::notice::Preview (PID $PID) detenido."
+            else
+              echo "::notice::El PID guardado ($PID) ya no existía — nada que matar."
+            fi
+            rm -f /tmp/wcsc-preview.pid /tmp/wcsc-preview.log
+          else
+            echo "::notice::No había ningún preview registrado."
+          fi
