@@ -28,10 +28,17 @@ auto-hospedado, disparado a mano.
   tenés corriendo localmente (con datos sembrados) — el ambiente efímero
   es solo el frontend. Nada de esto los levanta, migra ni destruye.
 - **Frontend efímero**: `preview-up.yml` hace build de producción de la
-  rama pedida y lo corre en background (`next start`, detached con
-  `setsid`) en el puerto que seas (default `3005`), con un `AUTH_SECRET`
-  generado al vuelo (no persiste, no hace falta guardarlo). `preview-down.yml`
-  mata ese proceso.
+  rama pedida y lo corre como unidad transient de `systemd --user`
+  (`wcsc-preview`) en el puerto que elijas (default `3005`), con un
+  `AUTH_SECRET` generado al vuelo (no persiste, no hace falta
+  guardarlo). `preview-down.yml` hace `systemctl --user stop wcsc-preview`.
+  **Por qué systemd y no `setsid nohup ... &`**: el runner corre cada job
+  dentro de su propio cgroup y lo destruye completo al terminar,
+  matando cualquier proceso detached aunque haya cambiado de sesión —
+  confirmado en producción: el server arrancaba y respondía bien, y aun
+  así moría apenas el job terminaba. `systemd-run --user` crea la unidad
+  en el cgroup del usuario, fuera del árbol del job.
+- Ver logs del preview en vivo: `journalctl --user -u wcsc-preview -f`.
 
 ## Cómo usarlo
 

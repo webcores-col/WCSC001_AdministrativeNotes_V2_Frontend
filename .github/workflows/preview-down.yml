@@ -1,15 +1,10 @@
 name: Preview local (destruir)
 
-# Contraparte de "Preview local (levantar)": mata lo que esté escuchando
-# en el puerto del preview. No toca el backend ni su base de datos — esos
+# Contraparte de "Preview local (levantar)": para la unidad systemd
+# --user "wcsc-preview". No toca el backend ni su base de datos — esos
 # son tu entorno de desarrollo persistente, no algo efímero.
 on:
   workflow_dispatch:
-    inputs:
-      port:
-        description: 'Puerto del preview a destruir'
-        required: false
-        default: '3005'
 
 permissions:
   contents: read
@@ -20,10 +15,9 @@ jobs:
     steps:
       - name: Detener el preview
         run: |
-          PORT="${{ inputs.port }}"
-          if fuser -k "$PORT/tcp" 2>/dev/null; then
-            sleep 1
-            echo "::notice::Preview en el puerto $PORT detenido."
+          if systemctl --user is-active --quiet wcsc-preview 2>/dev/null; then
+            systemctl --user stop wcsc-preview
+            echo "::notice::Preview detenido."
           else
-            echo "::notice::No había nada escuchando en el puerto $PORT — nada que destruir."
+            echo "::notice::No había ningún preview corriendo — nada que destruir."
           fi
