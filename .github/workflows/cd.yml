@@ -96,10 +96,18 @@ jobs:
           script: |
             set -e
             cd /opt/apps/wcsc001-frontend
+
+            # Guardar la imagen vigente ANTES de pisarla: es lo que hace
+            # posible el rollback automático de más abajo.
+            cp .env .env.previous 2>/dev/null || true
             echo "FRONTEND_IMAGE=$IMAGE" > .env
+
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
             docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d
+
+            # --wait: el despliegue falla si el contenedor no queda healthy.
+            # Sin esto, `up -d` retornaba éxito aunque la app arrancara rota.
+            docker compose -f docker-compose.prod.yml up -d --wait --wait-timeout 150
             docker image prune -f
         env:
           IMAGE: ${{ needs.build-push.outputs.image }}
@@ -108,3 +116,20 @@ jobs:
         run: |
           curl --fail --silent --show-error --retry 12 --retry-delay 5 --retry-all-errors \
             "${{ vars.PRODUCTION_URL }}/api/health"
+
+      # Sin esto, un despliegue malo se queda en producción hasta que un
+      # humano lo note.
+      - name: Rollback automático si el despliegue falló
+        if: failure()
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ vars.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_DEPLOY_SSH_KEY }}
+          script: /opt/infra/bin/rollback.sh wcsc001-frontend
+
+      - name: Marcar el fallo
+        if: failure()
+        run: |
+          echo "::error::Despliegue revertido a la imagen anterior. Revisar logs del servidor."
+          exit 1
