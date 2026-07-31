@@ -225,8 +225,7 @@ export default function AsociadosPage() {
               totalPages={totalPages}
               total={total}
               noun="asociados"
-              onPrevious={() => setPage((current) => current - 1)}
-              onNext={() => setPage((current) => current + 1)}
+              onPageChange={setPage}
             />
           }
         />

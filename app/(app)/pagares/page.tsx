@@ -217,8 +217,7 @@ export default function PagaresPage() {
               totalPages={totalPages}
               total={total}
               noun="pagarés"
-              onPrevious={() => setPage((current) => current - 1)}
-              onNext={() => setPage((current) => current + 1)}
+              onPageChange={setPage}
             />
           }
         />

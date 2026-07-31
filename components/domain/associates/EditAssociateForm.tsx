@@ -48,11 +48,7 @@ export function EditAssociateForm({
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={onSubmit}
-        className="grid gap-4 sm:grid-cols-2"
-        noValidate
-      >
+      <form onSubmit={onSubmit} className="flex flex-col gap-6" noValidate>
         <AssociateFieldset control={form.control} />
         <FormActions>
           <Button type="submit" disabled={mutation.isPending}>

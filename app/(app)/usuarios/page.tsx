@@ -200,8 +200,7 @@ export default function UsuariosPage() {
               totalPages={totalPages}
               total={total}
               noun="usuarios"
-              onPrevious={() => setPage((current) => current - 1)}
-              onNext={() => setPage((current) => current + 1)}
+              onPageChange={setPage}
             />
           }
         />
