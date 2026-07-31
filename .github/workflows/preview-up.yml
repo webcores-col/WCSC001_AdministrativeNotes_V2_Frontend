@@ -1,0 +1,110 @@
+name: Preview local (levantar)
+
+# Levanta el frontend de una rama/PR contra el backend local que ya tenés
+# corriendo (wcsc-v2-api en :3000 + wcsc-v2-db), para revisarlo en el
+# navegador antes de mergear a main. Ver docs/preview-local.md.
+#
+# Solo se dispara a mano (workflow_dispatch): el runner auto-hospedado
+# "local-preview" ejecuta este workflow en tu propia máquina, así que
+# nunca debe correr solo porque alguien abrió o actualizó un PR.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Rama a previsualizar (ej. feat/mi-rama)'
+        required: true
+      port:
+        description: 'Puerto local para el preview'
+        required: false
+        default: '3005'
+
+concurrency:
+  group: local-preview
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  preview-up:
+    runs-on: [self-hosted, local-preview]
+    steps:
+      - name: Verificar que no haya un preview corriendo ya
+        run: |
+          if systemctl --user is-active --quiet wcsc-preview 2>/dev/null; then
+            echo "::error::Ya hay un preview corriendo (unidad systemd 'wcsc-preview'). Corré 'Preview local (destruir)' primero."
+            exit 1
+          fi
+          PORT="${{ inputs.port }}"
+          if fuser "$PORT/tcp" >/dev/null 2>&1; then
+            echo "::error::El puerto $PORT ya está ocupado por otra cosa (no por 'wcsc-preview'). Elegí otro puerto o liberalo a mano."
+            exit 1
+          fi
+
+      - name: Verificar que el backend local esté arriba
+        run: |
+          if ! curl -fsS --max-time 3 http://localhost:3000/health >/dev/null 2>&1; then
+            echo "::error::No se pudo contactar el backend local en http://localhost:3000/health. Levantalo (wcsc-v2-api / npm run start:dev) antes de correr este workflow."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Build de producción
+        run: npm run build
+
+      - name: Ensamblar el output standalone
+        # `output: standalone` (next.config.ts) no copia public/ ni
+        # .next/static — hay que agregarlos a mano, igual que el
+        # Dockerfile. server.js puede terminar en una subcarpeta (Next
+        # a veces confunde la raíz del workspace si hay más de un
+        # lockfile visible), por eso se busca en vez de asumir la ruta.
+        run: |
+          SERVER_JS="$(find .next/standalone -maxdepth 6 -iname server.js -not -path '*/node_modules/*' | head -1)"
+          if [ -z "$SERVER_JS" ]; then
+            echo "::error::No se encontró .next/standalone/server.js después del build."
+            exit 1
+          fi
+          BASE_DIR="$(dirname "$SERVER_JS")"
+          mkdir -p "$BASE_DIR/public" "$BASE_DIR/.next"
+          cp -r public/. "$BASE_DIR/public/"
+          cp -r .next/static "$BASE_DIR/.next/static"
+          echo "SERVER_JS=$SERVER_JS" >> "$GITHUB_ENV"
+
+      - name: Arrancar el preview (systemd --user, sobrevive al fin del job)
+        # `setsid nohup ... &` no alcanza: el runner corre cada job dentro
+        # de su propio cgroup y lo destruye completo al terminar,
+        # matando cualquier descendiente aunque haya cambiado de sesión
+        # (confirmado: el server arrancaba bien, `wait-on` lo confirmaba,
+        # y aun así moría apenas terminaba el job). systemd-run --user
+        # crea una unidad transient en el cgroup del usuario, fuera del
+        # árbol de procesos del job — sobrevive a que el job termine.
+        run: |
+          AUTH_SECRET="$(openssl rand -base64 32)"
+          systemd-run --user --unit=wcsc-preview --collect \
+            --working-directory="$PWD" \
+            --setenv=PORT="${{ inputs.port }}" \
+            --setenv=HOSTNAME=0.0.0.0 \
+            --setenv=BACKEND_URL=http://localhost:3000 \
+            --setenv=AUTH_URL="http://localhost:${{ inputs.port }}" \
+            --setenv=AUTH_TRUST_HOST=true \
+            --setenv=AUTH_SECRET="$AUTH_SECRET" \
+            --setenv=LOG_LEVEL=info \
+            -- node "$SERVER_JS"
+
+      - name: Esperar a que responda
+        run: npx wait-on -t 60000 "http://localhost:${{ inputs.port }}/login"
+
+      - name: Listo
+        run: |
+          echo "::notice::Preview arriba en http://localhost:${{ inputs.port }} (rama: ${{ inputs.ref }}), contra el backend local en :3000. Corré 'Preview local (destruir)' cuando termines de revisarlo."

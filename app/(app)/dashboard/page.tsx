@@ -1,7 +1,14 @@
 'use client';
 
 import type { LucideIcon } from 'lucide-react';
-import { CalendarDays, FileText, Plus, UserCog, Users } from 'lucide-react';
+import {
+  ArrowRight,
+  CalendarDays,
+  FileText,
+  Plus,
+  UserCog,
+  Users,
+} from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -11,12 +18,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { UserAvatar } from '@/components/shared/UserAvatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { associateFullName } from '@/lib/api/associate-utils';
 import { getErrorMessage } from '@/lib/api/error-message';
@@ -83,42 +85,48 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.6fr_1fr]">
-        <HeroStat
+      <Card className="flex-col gap-0 divide-y divide-border-subtle overflow-hidden p-0 sm:flex-row sm:divide-x sm:divide-y-0">
+        <SummarySegment
+          title="Asociados"
+          icon={Users}
+          value={recentAssociates.data?.meta?.total}
+          isLoading={recentAssociates.isLoading}
+          isError={recentAssociates.isError}
+          href="/asociados"
+        />
+        <SummarySegment
           title="Pagarés"
-          foot="notas administrativas registradas"
           icon={FileText}
           value={notesCount.data?.meta?.total}
           isLoading={notesCount.isLoading}
           isError={notesCount.isError}
           href="/pagares"
         />
-        <Card className="gap-0 divide-y divide-border-subtle overflow-hidden py-0">
-          <CompactStat
-            title="Asociados"
-            icon={Users}
-            value={recentAssociates.data?.meta?.total}
-            isLoading={recentAssociates.isLoading}
-            isError={recentAssociates.isError}
-            href="/asociados"
+        {canReadUsers && (
+          <SummarySegment
+            title="Usuarios"
+            icon={UserCog}
+            value={usersCount.data?.meta?.total}
+            isLoading={usersCount.isLoading}
+            isError={usersCount.isError}
+            href="/usuarios"
           />
-          {canReadUsers && (
-            <CompactStat
-              title="Usuarios"
-              icon={UserCog}
-              value={usersCount.data?.meta?.total}
-              isLoading={usersCount.isLoading}
-              isError={usersCount.isError}
-              href="/usuarios"
-            />
-          )}
-        </Card>
-      </div>
+        )}
+      </Card>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">
-          Asociados actualizados recientemente
-        </h2>
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="text-lg font-semibold">
+            Asociados actualizados recientemente
+          </h2>
+          <Link
+            href="/asociados"
+            className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-green-700 focus-visible:rounded-sm focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+          >
+            Ver todos
+            <ArrowRight className="size-3.5" aria-hidden="true" />
+          </Link>
+        </div>
 
         {recentAssociates.isLoading && <LoadingState rows={6} />}
 
@@ -145,7 +153,7 @@ export default function DashboardPage() {
                   <li key={associate.numberIdentity}>
                     <Link
                       href={`/asociados/${associate.numberIdentity}`}
-                      className="flex items-center justify-between gap-4 px-5 py-3.5 transition-colors hover:bg-surface-soft"
+                      className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-surface-soft"
                     >
                       <span className="flex min-w-0 items-center gap-3">
                         <UserAvatar name={associateFullName(associate)} />
@@ -178,64 +186,7 @@ export default function DashboardPage() {
   );
 }
 
-/**
- * Métrica protagonista del resumen: Pagarés es el objeto central del
- * negocio (posicionamiento del producto), así que lleva más peso visual
- * que Asociados/Usuarios en vez de repetir la misma card tres veces.
- */
-function HeroStat({
-  title,
-  foot,
-  icon: Icon,
-  value,
-  isLoading,
-  isError,
-  href,
-}: {
-  title: string;
-  foot: string;
-  icon: LucideIcon;
-  value: number | undefined;
-  isLoading: boolean;
-  isError: boolean;
-  href: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group rounded-xl focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
-    >
-      <Card className="h-full gap-0 py-7 transition-[transform,box-shadow] duration-200 ease-out-soft group-hover:shadow-md motion-safe:group-hover:-translate-y-0.5">
-        <CardHeader className="gap-4">
-          <div className="flex items-center gap-3.5">
-            <span
-              aria-hidden="true"
-              className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-foreground"
-            >
-              <Icon className="size-5" />
-            </span>
-            <CardDescription className="text-xs font-medium tracking-[0.08em] uppercase">
-              {title}
-            </CardDescription>
-          </div>
-          <CardTitle className="text-[clamp(2.25rem,1.7rem+2.4vw,3.25rem)] tracking-tight tabular-nums">
-            {isLoading ? (
-              <Skeleton className="h-11 w-24" />
-            ) : isError ? (
-              '—'
-            ) : (
-              value
-            )}
-          </CardTitle>
-          <CardDescription>{foot}</CardDescription>
-        </CardHeader>
-      </Card>
-    </Link>
-  );
-}
-
-/** Fila compacta para las métricas secundarias, agrupadas en una sola card. */
-function CompactStat({
+function SummarySegment({
   title,
   icon: Icon,
   value,
@@ -253,21 +204,23 @@ function CompactStat({
   return (
     <Link
       href={href}
-      className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-surface-soft"
+      className="group flex flex-1 items-center gap-3 px-5 py-4 transition-colors hover:bg-surface-soft focus-visible:relative focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
     >
-      <span className="flex items-center gap-3">
-        <span
-          aria-hidden="true"
-          className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary-soft-foreground"
-        >
-          <Icon className="size-4" />
-        </span>
-        <span className="text-sm font-medium text-muted-foreground">
-          {title}
-        </span>
+      <span
+        aria-hidden="true"
+        className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary-soft-foreground transition-colors group-hover:bg-primary-soft/80"
+      >
+        <Icon className="size-4" />
       </span>
-      <span className="text-xl font-semibold tabular-nums">
-        {isLoading ? <Skeleton className="h-6 w-10" /> : isError ? '—' : value}
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span className="text-xs text-muted-foreground">{title}</span>
+        {isLoading ? (
+          <Skeleton className="h-6 w-12" />
+        ) : (
+          <span className="font-mono text-xl leading-none font-semibold tracking-tight tabular-nums">
+            {isError ? '—' : value}
+          </span>
+        )}
       </span>
     </Link>
   );

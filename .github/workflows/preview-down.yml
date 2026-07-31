@@ -1,0 +1,23 @@
+name: Preview local (destruir)
+
+# Contraparte de "Preview local (levantar)": para la unidad systemd
+# --user "wcsc-preview". No toca el backend ni su base de datos — esos
+# son tu entorno de desarrollo persistente, no algo efímero.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview-down:
+    runs-on: [self-hosted, local-preview]
+    steps:
+      - name: Detener el preview
+        run: |
+          if systemctl --user is-active --quiet wcsc-preview 2>/dev/null; then
+            systemctl --user stop wcsc-preview
+            echo "::notice::Preview detenido."
+          else
+            echo "::notice::No había ningún preview corriendo — nada que destruir."
+          fi
