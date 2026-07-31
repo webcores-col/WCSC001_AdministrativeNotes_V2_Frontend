@@ -1,7 +1,14 @@
 'use client';
 
 import type { LucideIcon } from 'lucide-react';
-import { CalendarDays, FileText, Plus, UserCog, Users } from 'lucide-react';
+import {
+  ArrowRight,
+  CalendarDays,
+  FileText,
+  Plus,
+  UserCog,
+  Users,
+} from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { EmptyState } from '@/components/shared/EmptyState';
@@ -11,12 +18,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { UserAvatar } from '@/components/shared/UserAvatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { associateFullName } from '@/lib/api/associate-utils';
 import { getErrorMessage } from '@/lib/api/error-message';
@@ -83,19 +85,17 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <StatCard
+      <Card className="flex-col gap-0 divide-y divide-border-subtle overflow-hidden p-0 sm:flex-row sm:divide-x sm:divide-y-0">
+        <SummarySegment
           title="Asociados"
-          foot="total registrados"
           icon={Users}
           value={recentAssociates.data?.meta?.total}
           isLoading={recentAssociates.isLoading}
           isError={recentAssociates.isError}
           href="/asociados"
         />
-        <StatCard
+        <SummarySegment
           title="Pagarés"
-          foot="notas administrativas"
           icon={FileText}
           value={notesCount.data?.meta?.total}
           isLoading={notesCount.isLoading}
@@ -103,9 +103,8 @@ export default function DashboardPage() {
           href="/pagares"
         />
         {canReadUsers && (
-          <StatCard
+          <SummarySegment
             title="Usuarios"
-            foot="con acceso al sistema"
             icon={UserCog}
             value={usersCount.data?.meta?.total}
             isLoading={usersCount.isLoading}
@@ -113,12 +112,21 @@ export default function DashboardPage() {
             href="/usuarios"
           />
         )}
-      </div>
+      </Card>
 
       <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">
-          Asociados actualizados recientemente
-        </h2>
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="text-lg font-semibold">
+            Asociados actualizados recientemente
+          </h2>
+          <Link
+            href="/asociados"
+            className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-green-700 focus-visible:rounded-sm focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+          >
+            Ver todos
+            <ArrowRight className="size-3.5" aria-hidden="true" />
+          </Link>
+        </div>
 
         {recentAssociates.isLoading && <LoadingState rows={6} />}
 
@@ -145,7 +153,7 @@ export default function DashboardPage() {
                   <li key={associate.numberIdentity}>
                     <Link
                       href={`/asociados/${associate.numberIdentity}`}
-                      className="flex items-center justify-between gap-4 px-5 py-3.5 transition-colors hover:bg-surface-soft"
+                      className="flex items-center justify-between gap-4 px-5 py-4 transition-colors hover:bg-surface-soft"
                     >
                       <span className="flex min-w-0 items-center gap-3">
                         <UserAvatar name={associateFullName(associate)} />
@@ -178,9 +186,8 @@ export default function DashboardPage() {
   );
 }
 
-function StatCard({
+function SummarySegment({
   title,
-  foot,
   icon: Icon,
   value,
   isLoading,
@@ -188,7 +195,6 @@ function StatCard({
   href,
 }: {
   title: string;
-  foot: string;
   icon: LucideIcon;
   value: number | undefined;
   isLoading: boolean;
@@ -198,33 +204,24 @@ function StatCard({
   return (
     <Link
       href={href}
-      className="group rounded-xl focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+      className="group flex flex-1 items-center gap-3 px-5 py-4 transition-colors hover:bg-surface-soft focus-visible:relative focus-visible:z-10 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
     >
-      <Card className="h-full gap-0 py-5 transition-[transform,box-shadow] duration-200 ease-out-soft group-hover:shadow-md motion-safe:group-hover:-translate-y-0.5">
-        <CardHeader className="gap-3">
-          <div className="flex items-center gap-3">
-            <span
-              aria-hidden="true"
-              className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary-soft-foreground"
-            >
-              <Icon className="size-[18px]" />
-            </span>
-            <CardDescription className="text-[11px] font-medium tracking-[0.08em] uppercase">
-              {title}
-            </CardDescription>
-          </div>
-          <CardTitle className="text-[clamp(1.75rem,1.4rem+1.4vw,2.25rem)] tracking-tight tabular-nums">
-            {isLoading ? (
-              <Skeleton className="h-9 w-16" />
-            ) : isError ? (
-              '—'
-            ) : (
-              value
-            )}
-          </CardTitle>
-          <CardDescription>{foot}</CardDescription>
-        </CardHeader>
-      </Card>
+      <span
+        aria-hidden="true"
+        className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary-soft-foreground transition-colors group-hover:bg-primary-soft/80"
+      >
+        <Icon className="size-4" />
+      </span>
+      <span className="flex min-w-0 flex-col gap-0.5">
+        <span className="text-xs text-muted-foreground">{title}</span>
+        {isLoading ? (
+          <Skeleton className="h-6 w-12" />
+        ) : (
+          <span className="font-mono text-xl leading-none font-semibold tracking-tight tabular-nums">
+            {isError ? '—' : value}
+          </span>
+        )}
+      </span>
     </Link>
   );
 }
