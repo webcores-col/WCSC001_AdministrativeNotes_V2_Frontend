@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { getErrorMessage } from '@/lib/api/error-message';
+import { applyApiFormError } from '@/lib/api/form-errors';
 import { useCreateAssociateMutation } from '@/lib/query/associates';
 import {
   createAssociateSchema,
@@ -48,11 +48,16 @@ export function CreateAssociateForm() {
       { ...values, surname2: values.surname2 || undefined },
       {
         onSuccess: (created) => {
-          toast.success('Asociado registrado.');
+          toast.success('Asociado creado.');
           router.push(`/asociados/${created.numberIdentity}`);
         },
+        // §8: el error de negocio que pertenece a un campo va inline en el
+        // campo; lo demás cae a toast persistente.
         onError: (error) => {
-          toast.error(getErrorMessage(error));
+          applyApiFormError(error, form, {
+            ASSOCIATE_ALREADY_EXISTS: 'numberIdentity',
+            ASSOCIATE_IDENTITY_TYPE_INVALID: 'typeIdentity',
+          });
         },
       },
     );
@@ -88,8 +93,8 @@ export function CreateAssociateForm() {
           >
             Cancelar
           </Button>
-          <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? 'Guardando…' : 'Registrar asociado'}
+          <Button type="submit" loading={mutation.isPending}>
+            Crear asociado
           </Button>
         </FormActions>
       </form>

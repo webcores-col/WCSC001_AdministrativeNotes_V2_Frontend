@@ -28,6 +28,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getErrorMessage } from '@/lib/api/error-message';
+import { applyApiFormError } from '@/lib/api/form-errors';
 import { hasPermission } from '@/lib/permissions/has-permission';
 import type { CatalogHooks } from '@/lib/query/catalogs';
 import {
@@ -61,7 +62,13 @@ export function CatalogManager({
         toast.success('Entrada creada.');
         form.reset();
       },
-      onError: (error) => toast.error(getErrorMessage(error)),
+      // El código duplicado pertenece a su campo (§8).
+      onError: (error) => {
+        applyApiFormError(error, form, {
+          IDENTITY_TYPE_ALREADY_EXISTS: 'code',
+          NOTE_TYPE_ALREADY_EXISTS: 'code',
+        });
+      },
     });
   });
 
@@ -103,8 +110,8 @@ export function CatalogManager({
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending ? 'Agregando…' : 'Agregar'}
+              <Button type="submit" loading={createMutation.isPending}>
+                Crear
               </Button>
             </form>
           </Form>

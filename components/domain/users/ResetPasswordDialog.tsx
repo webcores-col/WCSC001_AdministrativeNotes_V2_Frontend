@@ -25,7 +25,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { getErrorMessage } from '@/lib/api/error-message';
+import { applyApiFormError } from '@/lib/api/form-errors';
 import { useResetPasswordMutation } from '@/lib/query/users';
 import {
   resetPasswordSchema,
@@ -54,7 +54,7 @@ export function ResetPasswordDialog({
         form.reset();
         setOpen(false);
       },
-      onError: (error) => toast.error(getErrorMessage(error)),
+      onError: (error) => applyApiFormError(error, form, {}),
     });
   });
 
@@ -107,8 +107,8 @@ export function ResetPasswordDialog({
                   Cancelar
                 </Button>
               </DialogClose>
-              <Button type="submit" disabled={mutation.isPending}>
-                {mutation.isPending ? 'Guardando…' : 'Restablecer'}
+              <Button type="submit" loading={mutation.isPending}>
+                Restablecer
               </Button>
             </DialogFooter>
           </form>

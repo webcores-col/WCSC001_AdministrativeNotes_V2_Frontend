@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { getErrorMessage } from '@/lib/api/error-message';
+import { toastApiError } from '@/lib/api/form-errors';
 import { useSetUserStatusMutation } from '@/lib/query/users';
 
 export function ToggleStatusDialog({
@@ -55,7 +55,7 @@ export function ToggleStatusDialog({
           <Button
             type="button"
             variant={isActive ? 'destructive' : 'default'}
-            disabled={mutation.isPending}
+            loading={mutation.isPending}
             onClick={() => {
               mutation.mutate(
                 { code, payload: { isActive: !isActive } },
@@ -66,16 +66,12 @@ export function ToggleStatusDialog({
                     );
                     setOpen(false);
                   },
-                  onError: (error) => toast.error(getErrorMessage(error)),
+                  onError: (error) => toastApiError(error),
                 },
               );
             }}
           >
-            {mutation.isPending
-              ? 'Guardando…'
-              : isActive
-                ? 'Desactivar'
-                : 'Activar'}
+            {isActive ? 'Desactivar' : 'Activar'}
           </Button>
         </DialogFooter>
       </DialogContent>

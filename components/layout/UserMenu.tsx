@@ -22,7 +22,14 @@ export function UserMenu({ user }: { user: SessionUser }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-auto gap-2.5 px-2 py-1.5">
+        <Button
+          variant="ghost"
+          className="h-auto gap-2.5 px-2 py-1.5"
+          // En `< md` solo se ve el avatar (decorativo): sin esto el trigger
+          // no tendría nombre accesible en móvil. Sin la palabra «usuario»:
+          // colisionaría con los `getByLabel('Usuario')` de formularios.
+          aria-label={`Menú de ${fullName}`}
+        >
           <UserAvatar name={fullName} />
           <span className="hidden text-left leading-tight md:block">
             <span className="block text-sm font-semibold">{fullName}</span>

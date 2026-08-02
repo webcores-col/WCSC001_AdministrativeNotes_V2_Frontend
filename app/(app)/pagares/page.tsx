@@ -3,11 +3,11 @@
 import { Plus, X } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useState } from 'react';
 import { AssociatePicker } from '@/components/domain/associates/AssociatePicker';
 import { DeleteNoteDialog } from '@/components/domain/notes/DeleteNoteDialog';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ErrorState } from '@/components/shared/ErrorState';
+import { EmptyResults } from '@/components/shared/illustrations/EmptyResults';
 import { LoadingState } from '@/components/shared/LoadingState';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { TableCard } from '@/components/shared/TableCard';
@@ -24,7 +24,8 @@ import {
 } from '@/components/ui/table';
 import { associateFullName } from '@/lib/api/associate-utils';
 import { getErrorMessage } from '@/lib/api/error-message';
-import { formatDateShort } from '@/lib/format';
+import { formatDateOnly } from '@/lib/format';
+import { useListUrlState } from '@/lib/hooks/use-list-url-state';
 import { hasPermission } from '@/lib/permissions/has-permission';
 import { useNotesQuery } from '@/lib/query/notes';
 
@@ -41,8 +42,11 @@ function Folio({ id }: { id: number }) {
 
 export default function PagaresPage() {
   const { data: session } = useSession();
-  const [page, setPage] = useState(1);
-  const [associateId, setAssociateId] = useState<string | undefined>();
+  // Filtro de deudor y página viven en la URL (§8).
+  const { searchParams, setParams, page, setPage } = useListUrlState();
+  const associateId = searchParams.get('deudor') ?? undefined;
+  const setAssociateId = (value: string | undefined) =>
+    setParams({ deudor: value, page: undefined });
 
   const query = useNotesQuery({
     page,
@@ -83,10 +87,7 @@ export default function PagaresPage() {
           <AssociatePicker
             id="associateId-filter-picker"
             value={associateId}
-            onChange={(value) => {
-              setPage(1);
-              setAssociateId(value);
-            }}
+            onChange={setAssociateId}
             placeholder="Todos los deudores"
           />
         </div>
@@ -94,10 +95,7 @@ export default function PagaresPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              setPage(1);
-              setAssociateId(undefined);
-            }}
+            onClick={() => setAssociateId(undefined)}
           >
             <X aria-hidden="true" />
             Quitar filtro
@@ -122,9 +120,12 @@ export default function PagaresPage() {
       {query.isSuccess && rows.length === 0 && (
         <EmptyState
           title="No hay pagarés"
+          // «Sin resultados» por filtro es un estado distinto del «sin
+          // datos» real (§7): ilustración de búsqueda + copia propia.
+          illustration={associateId ? <EmptyResults /> : undefined}
           description={
             associateId
-              ? 'Este asociado no tiene pagarés registrados.'
+              ? 'Este asociado no tiene pagarés registrados. Quite el filtro para ver todos.'
               : 'Todavía no hay pagarés registrados. Cree el primero con «Nuevo pagaré».'
           }
         />
@@ -147,7 +148,12 @@ export default function PagaresPage() {
                   <TableHead>Tipo</TableHead>
                   <TableHead>Codeudor 1</TableHead>
                   <TableHead>Codeudor 2</TableHead>
-                  <TableHead>Registrado</TableHead>
+                  {/*
+                   * Fecha del pagaré (dato de negocio, decide el duplicado y
+                   * es el orden por defecto del backend), no `createdAt`, que
+                   * es el instante técnico de inserción.
+                   */}
+                  <TableHead>Fecha</TableHead>
                   {canDelete && (
                     <TableHead className="text-right">Acciones</TableHead>
                   )}
@@ -177,7 +183,7 @@ export default function PagaresPage() {
                       {note.codeudor2 ? associateFullName(note.codeudor2) : '—'}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {formatDateShort(note.createdAt)}
+                      {formatDateOnly(note.noteDate)}
                     </TableCell>
                     {canDelete && (
                       <TableCell className="text-right">
@@ -194,7 +200,7 @@ export default function PagaresPage() {
               <div className="flex items-center justify-between gap-3">
                 <Folio id={note.id} />
                 <span className="text-xs text-muted-foreground">
-                  {formatDateShort(note.createdAt)}
+                  {formatDateOnly(note.noteDate)}
                 </span>
               </div>
               <Link

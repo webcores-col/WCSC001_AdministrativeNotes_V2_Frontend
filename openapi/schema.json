@@ -1062,6 +1062,42 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "dateFrom",
+            "required": false,
+            "in": "query",
+            "description": "Fecha del pagaré desde (inclusive)",
+            "schema": {
+              "example": "2026-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": false,
+            "in": "query",
+            "description": "Fecha del pagaré hasta (inclusive)",
+            "schema": {
+              "example": "2026-12-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "Orden `campo:direccion`",
+            "schema": {
+              "default": "noteDate:desc",
+              "type": "string",
+              "enum": [
+                "noteDate:desc",
+                "noteDate:asc",
+                "createdAt:desc",
+                "createdAt:asc"
+              ]
+            }
           }
         ],
         "responses": {
@@ -1724,6 +1760,11 @@
           "noteType": {
             "$ref": "#/components/schemas/NoteTypeSummaryDto"
           },
+          "noteDate": {
+            "type": "string",
+            "description": "Fecha del pagaré (YYYY-MM-DD)",
+            "example": "2026-03-01"
+          },
           "codeudor1": {
             "nullable": true,
             "type": "object",
@@ -1755,6 +1796,7 @@
           "id",
           "associate",
           "noteType",
+          "noteDate",
           "createdAt",
           "updatedAt"
         ]

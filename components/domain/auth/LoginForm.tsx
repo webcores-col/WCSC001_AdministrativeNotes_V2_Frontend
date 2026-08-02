@@ -99,8 +99,8 @@ export function LoginForm() {
           </p>
         )}
 
-        <Button type="submit" disabled={isPending} className="mt-1 h-10 w-full">
-          {isPending ? 'Ingresando…' : 'Ingresar'}
+        <Button type="submit" loading={isPending} className="mt-1 h-10 w-full">
+          Ingresar
         </Button>
       </form>
     </Form>

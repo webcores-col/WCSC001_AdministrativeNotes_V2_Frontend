@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { getErrorMessage } from '@/lib/api/error-message';
+import { toastApiError } from '@/lib/api/form-errors';
 import { useDeleteNoteMutation } from '@/lib/query/notes';
 
 export function DeleteNoteDialog({
@@ -44,7 +44,8 @@ export function DeleteNoteDialog({
             <Trash2 className="size-[18px]" />
           </span>
           <DialogHeader>
-            <DialogTitle>¿Eliminar este pagaré?</DialogTitle>
+            {/* La confirmación destructiva repite el objeto con su folio (§8). */}
+            <DialogTitle>¿Eliminar el pagaré Nº {noteId}?</DialogTitle>
             <DialogDescription>
               Deja de aparecer en las consultas, pero queda registrado quién lo
               eliminó y cuándo. Puede volver a registrarse la misma combinación
@@ -61,21 +62,19 @@ export function DeleteNoteDialog({
           <Button
             type="button"
             variant="destructive"
-            disabled={mutation.isPending}
+            loading={mutation.isPending}
             onClick={() => {
               mutation.mutate(noteId, {
                 onSuccess: () => {
-                  toast.success('Pagaré eliminado.');
+                  toast.success(`Pagaré Nº ${noteId} eliminado.`);
                   setOpen(false);
                   onDeleted?.();
                 },
-                onError: (error) => {
-                  toast.error(getErrorMessage(error));
-                },
+                onError: (error) => toastApiError(error),
               });
             }}
           >
-            {mutation.isPending ? 'Eliminando…' : 'Eliminar'}
+            Eliminar
           </Button>
         </DialogFooter>
       </DialogContent>

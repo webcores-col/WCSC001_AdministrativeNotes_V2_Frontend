@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getErrorMessage } from '@/lib/api/error-message';
+import { toastApiError } from '@/lib/api/form-errors';
 import { ROLE_LABELS } from '@/lib/permissions/role-labels';
 import { useSetUserRoleMutation } from '@/lib/query/users';
 import { ROLES } from '@/lib/zod/user.schema';
@@ -79,21 +79,22 @@ export function RoleSelectDialog({
           </DialogClose>
           <Button
             type="button"
-            disabled={mutation.isPending || nextRole === role}
+            disabled={nextRole === role}
+            loading={mutation.isPending}
             onClick={() => {
               mutation.mutate(
                 { code, payload: { role: nextRole } },
                 {
                   onSuccess: () => {
-                    toast.success('Rol actualizado.');
+                    toast.success('Rol cambiado.');
                     setOpen(false);
                   },
-                  onError: (error) => toast.error(getErrorMessage(error)),
+                  onError: (error) => toastApiError(error),
                 },
               );
             }}
           >
-            {mutation.isPending ? 'Guardando…' : 'Confirmar'}
+            Confirmar
           </Button>
         </DialogFooter>
       </DialogContent>

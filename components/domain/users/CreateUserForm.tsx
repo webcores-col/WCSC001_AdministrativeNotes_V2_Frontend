@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getErrorMessage } from '@/lib/api/error-message';
+import { applyApiFormError } from '@/lib/api/form-errors';
 import { ROLE_LABELS } from '@/lib/permissions/role-labels';
 import { useCreateUserMutation } from '@/lib/query/users';
 import {
@@ -54,7 +54,11 @@ export function CreateUserForm() {
         toast.success('Usuario creado.');
         router.push('/usuarios');
       },
-      onError: (error) => toast.error(getErrorMessage(error)),
+      // El duplicado (código o username ya en uso) involucra dos campos
+      // posibles → error de formulario (root).
+      onError: (error) => {
+        applyApiFormError(error, form, { USER_ALREADY_EXISTS: 'root' });
+      },
     });
   });
 
@@ -154,6 +158,14 @@ export function CreateUserForm() {
             </FormItem>
           )}
         />
+        {form.formState.errors.root && (
+          <p
+            role="alert"
+            className="rounded-md bg-destructive-soft px-3 py-2 text-sm text-destructive-soft-foreground sm:col-span-2"
+          >
+            {form.formState.errors.root.message}
+          </p>
+        )}
         <FormActions>
           <Button
             type="button"
@@ -163,8 +175,8 @@ export function CreateUserForm() {
           >
             Cancelar
           </Button>
-          <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? 'Guardando…' : 'Crear usuario'}
+          <Button type="submit" loading={mutation.isPending}>
+            Crear usuario
           </Button>
         </FormActions>
       </form>

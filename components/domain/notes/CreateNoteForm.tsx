@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { getErrorMessage } from '@/lib/api/error-message';
+import { applyApiFormError } from '@/lib/api/form-errors';
 import { useNoteTypesQuery } from '@/lib/query/catalogs';
 import { useCreateNoteMutation } from '@/lib/query/notes';
 import { createNoteSchema, type CreateNoteInput } from '@/lib/zod/note.schema';
@@ -54,11 +54,20 @@ export function CreateNoteForm() {
       },
       {
         onSuccess: (created) => {
-          toast.success('Pagaré registrado.');
+          toast.success(`Pagaré Nº ${created.id} creado.`);
           router.push(`/pagares/${created.id}`);
         },
+        // §8: errores de negocio con campo dueño → inline; el duplicado y
+        // las reglas de codeudores involucran varios campos → error de
+        // formulario (root), visible sobre las acciones.
         onError: (error) => {
-          toast.error(getErrorMessage(error));
+          applyApiFormError(error, form, {
+            NOTE_DUPLICATED: 'root',
+            NOTE_DEBTOR_NOT_FOUND: 'associateId',
+            NOTE_TYPE_INVALID: 'typeNote',
+            NOTE_CODEBTOR_NOT_FOUND: 'root',
+            NOTE_CODEBTORS_NOT_DISTINCT: 'root',
+          });
         },
       },
     );
@@ -142,6 +151,15 @@ export function CreateNoteForm() {
           )}
         />
 
+        {form.formState.errors.root && (
+          <p
+            role="alert"
+            className="rounded-md bg-destructive-soft px-3 py-2 text-sm text-destructive-soft-foreground"
+          >
+            {form.formState.errors.root.message}
+          </p>
+        )}
+
         <FormActions>
           <Button
             type="button"
@@ -151,8 +169,8 @@ export function CreateNoteForm() {
           >
             Cancelar
           </Button>
-          <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending ? 'Guardando…' : 'Registrar pagaré'}
+          <Button type="submit" loading={mutation.isPending}>
+            Crear pagaré
           </Button>
         </FormActions>
       </form>

@@ -3,7 +3,6 @@
 import { Plus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useState } from 'react';
 import { EmptyState } from '@/components/shared/EmptyState';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { EmptyResults } from '@/components/shared/illustrations/EmptyResults';
@@ -32,7 +31,10 @@ import {
 } from '@/components/ui/table';
 import { associateFullName } from '@/lib/api/associate-utils';
 import { getErrorMessage } from '@/lib/api/error-message';
-import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
+import {
+  useListUrlState,
+  useUrlSearchInput,
+} from '@/lib/hooks/use-list-url-state';
 import { hasPermission } from '@/lib/permissions/has-permission';
 import { useAssociatesQuery } from '@/lib/query/associates';
 
@@ -54,10 +56,15 @@ const SORT_OPTIONS = [
  */
 export default function AsociadosPage() {
   const { data: session } = useSession();
-  const [page, setPage] = useState(1);
-  const [searchInput, setSearchInput] = useState('');
-  const [sort, setSort] = useState<string>('updatedAt:desc');
-  const search = useDebouncedValue(searchInput, 300);
+  // Búsqueda, orden y página viven en la URL (§8): el atrás del navegador
+  // restaura la vista y los enlaces se pueden compartir.
+  const { searchParams, setParams, page, setPage } = useListUrlState();
+  const search = searchParams.get('q') ?? '';
+  const sort = searchParams.get('sort') ?? 'updatedAt:desc';
+  const { input: searchInput, setInput: setSearchInput } = useUrlSearchInput(
+    setParams,
+    search,
+  );
 
   const query = useAssociatesQuery({ page, size: PAGE_SIZE, search, sort });
   const rows = query.data?.data ?? [];
@@ -87,22 +94,22 @@ export default function AsociadosPage() {
 
       <div className="flex flex-wrap items-center gap-3">
         <Input
+          aria-label="Buscar asociados"
           placeholder="Buscar por nombre, apellido o identificación..."
           value={searchInput}
-          onChange={(event) => {
-            setPage(1);
-            setSearchInput(event.target.value);
-          }}
+          onChange={(event) => setSearchInput(event.target.value)}
           className="max-w-sm bg-card"
         />
         <Select
           value={sort}
-          onValueChange={(value) => {
-            setPage(1);
-            setSort(value);
-          }}
+          onValueChange={(value) =>
+            setParams({
+              sort: value === 'updatedAt:desc' ? undefined : value,
+              page: undefined,
+            })
+          }
         >
-          <SelectTrigger className="w-64 bg-card">
+          <SelectTrigger aria-label="Ordenar por" className="w-64 bg-card">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
