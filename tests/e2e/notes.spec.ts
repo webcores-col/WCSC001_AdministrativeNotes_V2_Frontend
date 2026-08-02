@@ -13,6 +13,23 @@ test('registra un pagaré, aparece filtrando por deudor, y se puede eliminar', a
   // hasta que aparezca el resultado correcto, no uno cualquiera con ese nombre.
   const optionPattern = new RegExp(`${fullName}.*\\(${numberIdentity}\\)`);
 
+  // El seed del backend siembra tipos de identificación pero NO tipos de
+  // pagaré, así que en una base recién sembrada —la que el pipeline crea en
+  // cada corrida— este catálogo está vacío y el formulario de pagarés no
+  // tiene nada que elegir. El test crea el suyo en vez de depender de datos
+  // que no sembró; si ya hay tipos (base de desarrollo) no toca nada.
+  await page.goto('/catalogos/tipos-pagare');
+  const catalogoVacio = page.getByText('Sin entradas');
+  const catalogoConDatos = page.getByRole('table');
+  await expect(catalogoVacio.or(catalogoConDatos).first()).toBeVisible();
+
+  if (await catalogoVacio.isVisible()) {
+    await page.getByLabel('Código').fill('E2E');
+    await page.getByLabel('Nombre').fill('Pagaré de pruebas E2E');
+    await page.getByRole('button', { name: 'Crear' }).click();
+    await expect(page.getByRole('table')).toBeVisible();
+  }
+
   // Asociado de prueba para usar como deudor.
   await page.goto('/asociados/nuevo');
   await page.getByLabel('Número de identificación').fill(numberIdentity);
