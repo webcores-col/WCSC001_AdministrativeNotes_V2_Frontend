@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   formatCurrencyCOP,
+  formatDateOnly,
   formatDateShort,
   formatNumberIdentity,
 } from './format';
@@ -25,6 +26,19 @@ describe('formatDateShort', () => {
 
   it('acepta strings ISO con hora (como los devuelve el backend)', () => {
     expect(formatDateShort('2026-06-12T15:30:00-05:00')).toMatch(/jun/i);
+  });
+});
+
+describe('formatDateOnly', () => {
+  it('muestra el mismo día de calendario que envió el backend', () => {
+    // El caso que motiva el formateador: `new Date('2026-03-01')` es
+    // medianoche UTC, y al formatearla en Colombia (UTC-5) caería al 28 de
+    // febrero. Debe mostrar el 1 de marzo en cualquier zona.
+    expect(formatDateOnly('2026-03-01')).toMatch(/1.*mar.*2026/i);
+  });
+
+  it('no corre el día en el primero de enero', () => {
+    expect(formatDateOnly('2026-01-01')).toMatch(/1.*ene.*2026/i);
   });
 });
 

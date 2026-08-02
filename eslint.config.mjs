@@ -21,6 +21,8 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
     'openapi/**',
     'lib/api/schema.d.ts',
+    // Generado por `test:coverage`; en CI no existe al correr lint, en local sí.
+    'coverage/**',
   ]),
 ]);
 

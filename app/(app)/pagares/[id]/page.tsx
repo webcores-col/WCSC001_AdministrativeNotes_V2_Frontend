@@ -8,6 +8,7 @@ import { LoadingState } from '@/components/shared/LoadingState';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { associateFullName } from '@/lib/api/associate-utils';
 import { getErrorMessage } from '@/lib/api/error-message';
+import { formatDateOnly } from '@/lib/format';
 import { hasPermission } from '@/lib/permissions/has-permission';
 import { useNoteQuery } from '@/lib/query/notes';
 
@@ -42,6 +43,13 @@ export default function PagareDetallePage() {
             </dd>
             <dt className="text-muted-foreground">Tipo</dt>
             <dd>{query.data.noteType.name}</dd>
+            {/*
+             * Fecha del pagaré: el dato de negocio con el que el backend
+             * decide si dos registros son duplicados. «Registrado» (abajo)
+             * es el instante técnico de inserción, para auditoría.
+             */}
+            <dt className="text-muted-foreground">Fecha del pagaré</dt>
+            <dd>{formatDateOnly(query.data.noteDate)}</dd>
             <dt className="text-muted-foreground">Codeudor 1</dt>
             <dd>
               {query.data.codeudor1

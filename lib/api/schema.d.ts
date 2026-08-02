@@ -546,6 +546,11 @@ export interface components {
       id: number;
       associate: components['schemas']['NoteAssociateSummaryDto'];
       noteType: components['schemas']['NoteTypeSummaryDto'];
+      /**
+       * @description Fecha del pagaré (YYYY-MM-DD)
+       * @example 2026-03-01
+       */
+      noteDate: string;
       codeudor1?: components['schemas']['NoteAssociateSummaryDto'] | null;
       codeudor2?: components['schemas']['NoteAssociateSummaryDto'] | null;
       /** Format: date-time */
@@ -1187,6 +1192,13 @@ export interface operations {
         size?: number;
         /** @description Filtra los pagarés de un asociado (deudor) */
         associateId?: string;
+        /** @description Fecha del pagaré desde (inclusive) */
+        dateFrom?: string;
+        /** @description Fecha del pagaré hasta (inclusive) */
+        dateTo?: string;
+        /** @description Orden `campo:direccion` */
+        sort?:
+          'noteDate:desc' | 'noteDate:asc' | 'createdAt:desc' | 'createdAt:asc';
       };
       header?: never;
       path?: never;

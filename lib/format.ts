@@ -27,6 +27,25 @@ export function formatDateShort(date: Date | string): string {
   return dateFormatter.format(typeof date === 'string' ? new Date(date) : date);
 }
 
+/*
+ * Un `YYYY-MM-DD` del contrato (la fecha del pagaré, la de nacimiento) es un
+ * día de calendario, no un instante: `new Date('2026-03-01')` se parsea como
+ * medianoche UTC y al formatearlo en la zona local (Colombia, UTC-5) caería
+ * al día anterior. Este formateador fija UTC para que el día mostrado sea
+ * exactamente el que envió el backend.
+ */
+const dateOnlyFormatter = new Intl.DateTimeFormat('es-CO', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+/** «1 mar 2026» — fechas sin hora (`YYYY-MM-DD`), sin corrimiento de día. */
+export function formatDateOnly(value: string): string {
+  return dateOnlyFormatter.format(new Date(`${value}T00:00:00Z`));
+}
+
 /**
  * «1.045.228.917» — número de identificación agrupado con puntos de miles.
  * Si el valor trae algo que no sean dígitos (formatos raros del legacy) se

@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/table';
 import { associateFullName } from '@/lib/api/associate-utils';
 import { getErrorMessage } from '@/lib/api/error-message';
-import { formatDateShort } from '@/lib/format';
+import { formatDateOnly } from '@/lib/format';
 import { useListUrlState } from '@/lib/hooks/use-list-url-state';
 import { hasPermission } from '@/lib/permissions/has-permission';
 import { useNotesQuery } from '@/lib/query/notes';
@@ -148,7 +148,12 @@ export default function PagaresPage() {
                   <TableHead>Tipo</TableHead>
                   <TableHead>Codeudor 1</TableHead>
                   <TableHead>Codeudor 2</TableHead>
-                  <TableHead>Registrado</TableHead>
+                  {/*
+                   * Fecha del pagaré (dato de negocio, decide el duplicado y
+                   * es el orden por defecto del backend), no `createdAt`, que
+                   * es el instante técnico de inserción.
+                   */}
+                  <TableHead>Fecha</TableHead>
                   {canDelete && (
                     <TableHead className="text-right">Acciones</TableHead>
                   )}
@@ -178,7 +183,7 @@ export default function PagaresPage() {
                       {note.codeudor2 ? associateFullName(note.codeudor2) : '—'}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {formatDateShort(note.createdAt)}
+                      {formatDateOnly(note.noteDate)}
                     </TableCell>
                     {canDelete && (
                       <TableCell className="text-right">
@@ -195,7 +200,7 @@ export default function PagaresPage() {
               <div className="flex items-center justify-between gap-3">
                 <Folio id={note.id} />
                 <span className="text-xs text-muted-foreground">
-                  {formatDateShort(note.createdAt)}
+                  {formatDateOnly(note.noteDate)}
                 </span>
               </div>
               <Link
