@@ -1,14 +1,14 @@
-# Despliegue de producción en el VPS compartido de COINTRAMIN.
+# Despliegue de producción en el VPS de COINTRAMIN.
 #
-# Se conecta a la red compartida entre los proyectos de este cliente,
-# definida fuera de este repo en /opt/infra del servidor (ver README.md).
-# Esta app es stateless (habla con el backend por la red Docker interna,
-# nunca sale a Internet) — no necesita su propio servicio de base de datos.
+# Sigue el estándar de WCS_Infra (ADR-006). La infraestructura compartida
+# —redes, Postgres, Caddy— vive fuera de este repo, en /opt/infra del
+# servidor. Esta app es stateless: habla con el backend por la red Docker
+# interna y nunca sale a Internet por su cuenta.
 #
 # `image` se resuelve con FRONTEND_IMAGE (variable en un `.env` junto a
 # este archivo, no versionado): en bootstrap/local apunta al build local
 # (`docker compose build`); el pipeline de CD la sobreescribe con la
-# imagen publicada en GHCR antes de `docker compose pull && up -d`.
+# imagen publicada en GHCR antes de `docker compose pull && up -d --wait`.
 services:
   frontend:
     image: ${FRONTEND_IMAGE:-wcsc001-administrative-notes-frontend:prod}
@@ -18,9 +18,38 @@ services:
     container_name: wcsc001-frontend
     restart: unless-stopped
     env_file: .env.prod
+
+    # Solo `edge`: alcanzable por Caddy y capaz de llamar a la API. NO se
+    # une a `data` — un frontend no tiene por qué poder siquiera resolver
+    # el nombre de la base de datos. Ese es el aislamiento del estándar.
     networks:
-      - web
+      - edge
+
+    labels:
+      wcs.app: 'wcsc001-frontend'
+      wcs.client: 'cointramin'
+
+    # Límites obligatorios del estándar (ver ADR-006). Uso real medido
+    # ~75 MB; 512m deja cabecera para picos de renderizado.
+    cpus: 0.75
+    mem_limit: 512m
+    mem_reservation: 96m
+    pids_limit: 200
+
+    security_opt:
+      - no-new-privileges:true
+
+    healthcheck:
+      test: ['CMD', 'node', '-e', "require('http').get('http://127.0.0.1:3001/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+    logging:
+      driver: json-file
+      options: { max-size: '10m', max-file: '3' }
 
 networks:
-  web:
+  edge:
     external: true
