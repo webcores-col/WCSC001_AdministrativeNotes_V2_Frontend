@@ -10,9 +10,5 @@ export function HeaderTitle() {
     ? 'Mi perfil'
     : MENU_ITEMS.find((item) => pathname.startsWith(item.href))?.label;
 
-  return (
-    <span className="text-sm font-semibold">
-      {label ?? 'COINTRAMIN'}
-    </span>
-  );
+  return <span className="text-sm font-semibold">{label ?? 'COINTRAMIN'}</span>;
 }
