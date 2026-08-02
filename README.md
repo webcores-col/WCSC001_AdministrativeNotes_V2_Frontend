@@ -48,7 +48,7 @@ npm run dev                   # http://localhost:3001
 | `npm run lint` / `format:check` | ESLint / Prettier (verificar)                               |
 | `npm run typecheck`             | `tsc --noEmit`                                              |
 | `npm test`                      | Vitest (unit + componentes + integración MSW)               |
-| `npm run test:e2e`              | Playwright (workflow separado, no bloqueante en CI)         |
+| `npm run test:e2e`              | Playwright (workflow separado, bloqueante en CI)            |
 | `npm run build`                 | Build de producción (`output: standalone`)                  |
 | `npm run generate:api-types`    | Regenerar tipos desde `openapi/schema.json`                 |
 | `npm run fetch:api-schema`      | Actualizar `openapi/schema.json` desde un backend corriendo |
@@ -76,11 +76,12 @@ limita a 5 intentos por minuto por IP — correr la suite completa varias
 veces seguidas en menos de un minuto puede toparse con el rate limiting
 real (no es un bug del test, ver el comentario en `tests/e2e/auth.spec.ts`).
 
-`.github/workflows/e2e.yml` la corre en CI (workflow separado, no
-bloqueante) construyendo el backend desde su código fuente. El acceso a ese
-repo privado va por el secret `BACKEND_REPO_SSH_KEY` — la clave privada de
-una deploy key de **solo lectura** del backend, preferida a un PAT porque
-queda acotada a ese repo y sin permiso de escritura.
+`.github/workflows/e2e.yml` la corre en CI (workflow separado, **required
+status check** de `main`) construyendo el backend desde su código fuente. El
+acceso a ese repo privado va por el secret `BACKEND_REPO_SSH_KEY` — la clave
+privada de una deploy key de **solo lectura** del backend, preferida a un
+PAT porque queda acotada a ese repo y sin permiso de escritura. Si el secret
+falta, el workflow falla en vez de saltarse la suite en silencio.
 
 ## Observabilidad
 
