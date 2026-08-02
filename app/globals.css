@@ -259,4 +259,16 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
+
+  /* §4.7/§9: sin movimiento no esencial cuando el usuario lo pide. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }

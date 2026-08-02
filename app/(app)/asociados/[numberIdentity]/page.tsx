@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { EditAssociateForm } from '@/components/domain/associates/EditAssociateForm';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { LoadingState } from '@/components/shared/LoadingState';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { getSurname2 } from '@/lib/api/associate-utils';
 import { getErrorMessage } from '@/lib/api/error-message';
@@ -23,11 +24,9 @@ export default function AsociadoDetallePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">
-        Asociado {params.numberIdentity}
-      </h1>
+      <PageHeader title={`Asociado ${params.numberIdentity}`} />
 
-      {query.isLoading && <LoadingState />}
+      {query.isLoading && <LoadingState variant="detail" />}
 
       {query.isError && (
         <ErrorState
@@ -62,7 +61,7 @@ function AssociateReadOnly({ associate }: { associate: AssociateResponseDto }) {
       <dt className="text-muted-foreground">Estado</dt>
       <dd>
         <Badge
-          variant={associate.status === 'ACTIVE' ? 'default' : 'secondary'}
+          variant={associate.status === 'ACTIVE' ? 'success' : 'secondary'}
         >
           {associate.status === 'ACTIVE' ? 'Activo' : 'Inactivo'}
         </Badge>

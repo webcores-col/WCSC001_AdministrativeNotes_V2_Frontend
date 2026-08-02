@@ -1,12 +1,36 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * Placeholder de carga para vistas de listado. Respeta la silueta real del
- * patrón de tabla (plan §5.6): header + filas h-14 con avatar, dos líneas
- * y badge — misma altura que el contenido real para que no haya saltos de
- * layout al resolver (CLS ≈ 0).
+ * Placeholders de carga con la silueta real del patrón que reemplazan
+ * (plan §5.6) — misma altura que el contenido real para que no haya saltos
+ * de layout al resolver (CLS ≈ 0):
+ * - `table` (default): header + filas h-14 con avatar, dos líneas y badge.
+ * - `detail`: pares label/valor de una vista de detalle o formulario.
  */
-export function LoadingState({ rows = 5 }: { rows?: number }) {
+export function LoadingState({
+  rows = 5,
+  variant = 'table',
+}: {
+  rows?: number;
+  variant?: 'table' | 'detail';
+}) {
+  if (variant === 'detail') {
+    return (
+      <div
+        role="status"
+        aria-label="Cargando"
+        className="grid max-w-md grid-cols-2 gap-x-4 gap-y-4"
+      >
+        {Array.from({ length: rows }).map((_, index) => (
+          <div key={index} className="contents">
+            <Skeleton className="h-4 w-28 self-center" />
+            <Skeleton className="h-4 w-40 self-center" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div
       role="status"

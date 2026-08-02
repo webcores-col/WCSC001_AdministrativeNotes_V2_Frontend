@@ -61,7 +61,10 @@ export function AssociatePicker({
           className="w-full justify-between font-normal"
         >
           <span className="truncate">{triggerLabel}</span>
-          <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
+          <ChevronsUpDown
+            className="size-4 shrink-0 opacity-50"
+            aria-hidden="true"
+          />
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -71,6 +74,7 @@ export function AssociatePicker({
         <div className="p-2">
           <Input
             autoFocus
+            aria-label="Buscar asociado"
             placeholder="Nombre, apellido o identificación..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
@@ -104,7 +108,7 @@ export function AssociatePicker({
                 </span>
               </span>
               {value === associate.numberIdentity && (
-                <Check className="size-4 shrink-0" />
+                <Check className="size-4 shrink-0" aria-hidden="true" />
               )}
             </button>
           ))}

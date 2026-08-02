@@ -5,3 +5,6 @@ build
 coverage
 openapi/schema.json
 package-lock.json
+.claude
+.impeccable
+test-results

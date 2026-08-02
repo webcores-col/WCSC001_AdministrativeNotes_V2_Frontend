@@ -21,7 +21,7 @@ test('registra un pagaré, aparece filtrando por deudor, y se puede eliminar', a
   await page.getByLabel('Nombres').fill('E2E Deudor');
   await page.getByLabel('Primer apellido').fill('Pagares');
   await page.getByLabel('Fecha de nacimiento').fill('1990-01-01');
-  await page.getByRole('button', { name: 'Registrar asociado' }).click();
+  await page.getByRole('button', { name: 'Crear asociado' }).click();
   await expect(page).toHaveURL(`/asociados/${numberIdentity}`);
 
   // Registrar el pagaré.
@@ -33,7 +33,7 @@ test('registra un pagaré, aparece filtrando por deudor, y se puede eliminar', a
   await page.getByRole('button', { name: optionPattern }).click();
   await page.getByLabel('Tipo de pagaré').click();
   await page.getByRole('option').first().click();
-  await page.getByRole('button', { name: 'Registrar pagaré' }).click();
+  await page.getByRole('button', { name: 'Crear pagaré' }).click();
 
   await expect(page).toHaveURL(/\/pagares\/\d+/);
   await expect(page.getByText(numberIdentity)).toBeVisible();

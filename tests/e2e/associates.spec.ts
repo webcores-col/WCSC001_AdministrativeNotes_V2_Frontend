@@ -14,7 +14,7 @@ test('registra un asociado nuevo y lo muestra en su detalle', async ({
   await page.getByLabel('Primer apellido').fill('Playwright');
   await page.getByLabel('Fecha de nacimiento').fill('1990-01-01');
 
-  await page.getByRole('button', { name: 'Registrar asociado' }).click();
+  await page.getByRole('button', { name: 'Crear asociado' }).click();
 
   await expect(page).toHaveURL(`/asociados/${numberIdentity}`);
   await expect(page.getByLabel('Nombres')).toHaveValue('E2E');

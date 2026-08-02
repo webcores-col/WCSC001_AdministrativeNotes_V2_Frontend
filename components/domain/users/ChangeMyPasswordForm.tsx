@@ -13,7 +13,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { getErrorMessage } from '@/lib/api/error-message';
+import { applyApiFormError } from '@/lib/api/form-errors';
 import { useChangeMyPasswordMutation } from '@/lib/query/users';
 import {
   changeMyPasswordSchema,
@@ -40,10 +40,15 @@ export function ChangeMyPasswordForm() {
       },
       {
         onSuccess: () => {
-          toast.success('Contraseña actualizada.');
+          toast.success('Contraseña cambiada.');
           form.reset();
         },
-        onError: (error) => toast.error(getErrorMessage(error)),
+        // La contraseña actual incorrecta pertenece a su campo (§8).
+        onError: (error) => {
+          applyApiFormError(error, form, {
+            USER_INVALID_CURRENT_PASSWORD: 'currentPassword',
+          });
+        },
       },
     );
   });
@@ -98,8 +103,8 @@ export function ChangeMyPasswordForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? 'Guardando…' : 'Cambiar contraseña'}
+        <Button type="submit" loading={mutation.isPending}>
+          Cambiar contraseña
         </Button>
       </form>
     </Form>

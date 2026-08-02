@@ -3,7 +3,6 @@
 import { Plus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useState } from 'react';
 import { ResetPasswordDialog } from '@/components/domain/users/ResetPasswordDialog';
 import { RoleSelectDialog } from '@/components/domain/users/RoleSelectDialog';
 import { ToggleStatusDialog } from '@/components/domain/users/ToggleStatusDialog';
@@ -27,7 +26,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getErrorMessage } from '@/lib/api/error-message';
-import { useDebouncedValue } from '@/lib/hooks/use-debounced-value';
+import {
+  useListUrlState,
+  useUrlSearchInput,
+} from '@/lib/hooks/use-list-url-state';
 import { hasPermission } from '@/lib/permissions/has-permission';
 import { ROLE_LABELS } from '@/lib/permissions/role-labels';
 import { useUsersQuery } from '@/lib/query/users';
@@ -36,9 +38,13 @@ const PAGE_SIZE = 20;
 
 export default function UsuariosPage() {
   const { data: session } = useSession();
-  const [page, setPage] = useState(1);
-  const [searchInput, setSearchInput] = useState('');
-  const search = useDebouncedValue(searchInput, 300);
+  // Búsqueda y página viven en la URL (§8).
+  const { searchParams, setParams, page, setPage } = useListUrlState();
+  const search = searchParams.get('q') ?? '';
+  const { input: searchInput, setInput: setSearchInput } = useUrlSearchInput(
+    setParams,
+    search,
+  );
 
   const query = useUsersQuery({ page, size: PAGE_SIZE, search });
   const rows = query.data?.data ?? [];
@@ -89,12 +95,10 @@ export default function UsuariosPage() {
 
       <div className="flex flex-wrap items-center gap-3">
         <Input
+          aria-label="Buscar usuarios"
           placeholder="Buscar por nombre, apellido o usuario..."
           value={searchInput}
-          onChange={(event) => {
-            setPage(1);
-            setSearchInput(event.target.value);
-          }}
+          onChange={(event) => setSearchInput(event.target.value)}
           className="max-w-sm bg-card"
         />
         {query.isSuccess && (

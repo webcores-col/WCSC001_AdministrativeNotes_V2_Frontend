@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { getErrorMessage } from '@/lib/api/error-message';
+import { toastApiError } from '@/lib/api/form-errors';
 
 export function DeleteCatalogEntryButton({
   code,
@@ -60,15 +60,21 @@ export function DeleteCatalogEntryButton({
           <Button
             type="button"
             variant="destructive"
-            disabled={deleteMutation.isPending}
+            loading={deleteMutation.isPending}
             onClick={() => {
               deleteMutation.mutate(code, {
-                onSuccess: () => setOpen(false),
-                onError: (error) => toast.error(getErrorMessage(error)),
+                onSuccess: () => {
+                  toast.success('Entrada eliminada.');
+                  setOpen(false);
+                },
+                // El 409 por entradas en uso queda como toast persistente
+                // (§8): el error no pertenece a ningún campo y el usuario
+                // decide cuándo cerrarlo.
+                onError: (error) => toastApiError(error),
               });
             }}
           >
-            {deleteMutation.isPending ? 'Eliminando…' : 'Eliminar'}
+            Eliminar
           </Button>
         </DialogFooter>
       </DialogContent>

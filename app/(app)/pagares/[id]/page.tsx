@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { DeleteNoteDialog } from '@/components/domain/notes/DeleteNoteDialog';
 import { ErrorState } from '@/components/shared/ErrorState';
 import { LoadingState } from '@/components/shared/LoadingState';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { associateFullName } from '@/lib/api/associate-utils';
 import { getErrorMessage } from '@/lib/api/error-message';
 import { hasPermission } from '@/lib/permissions/has-permission';
@@ -20,9 +21,9 @@ export default function PagareDetallePage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">Pagaré #{params.id}</h1>
+      <PageHeader title={`Pagaré Nº ${params.id}`} />
 
-      {query.isLoading && <LoadingState />}
+      {query.isLoading && <LoadingState variant="detail" />}
 
       {query.isError && (
         <ErrorState
