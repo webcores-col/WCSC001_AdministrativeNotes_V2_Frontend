@@ -77,9 +77,10 @@ veces seguidas en menos de un minuto puede toparse con el rate limiting
 real (no es un bug del test, ver el comentario en `tests/e2e/auth.spec.ts`).
 
 `.github/workflows/e2e.yml` la corre en CI (workflow separado, no
-bloqueante) construyendo el backend desde su código fuente — necesita el
-secret `BACKEND_REPO_PAT` (no configurado todavía, ver comentario en ese
-archivo).
+bloqueante) construyendo el backend desde su código fuente. El acceso a ese
+repo privado va por el secret `BACKEND_REPO_SSH_KEY` — la clave privada de
+una deploy key de **solo lectura** del backend, preferida a un PAT porque
+queda acotada a ese repo y sin permiso de escritura.
 
 ## Observabilidad
 
