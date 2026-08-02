@@ -35,7 +35,14 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
+    /*
+     * El puerto se pasa explícito y se deriva de `baseURL`: sin él,
+     * `next dev` toma el 3000 —el del backend— y solo funciona de casualidad,
+     * porque al encontrarlo ocupado Next cae al 3001. Ese fallback no ocurre
+     * cuando `PORT` viene definido en el entorno (el pipeline lo fija en 3000
+     * para el backend): ahí Next respeta la variable y muere con EADDRINUSE.
+     */
+    command: `npm run dev -- --port ${new URL(baseURL).port || '3001'}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
