@@ -7,8 +7,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# No bloqueante a propósito (ver docs/PLAN_ARQUITECTURA.md, Fase 10): no es
-# un required status check, un fallo acá no impide mergear.
+# Bloqueante: es un required status check de `main`. Nació como no
+# bloqueante (Fase 10) mientras la suite no podía correr en CI por falta de
+# acceso al repo del backend; con ese acceso resuelto y la suite corriendo
+# en menos de 3 minutos, dejarla informativa solo servía para que un fallo
+# real pasara inadvertido.
 #
 # Necesita el backend real corriendo (Postgres + migraciones + seed), no
 # solo este frontend. Se construye desde el código fuente del backend, NO
@@ -28,16 +31,14 @@ on:
 # además caduca con él. Para rotarla: generar un par nuevo, reemplazar la
 # deploy key en el backend y actualizar este secret.
 #
-# Confirmado en runtime (2026-07-23): sin ese secret, `actions/checkout`
-# falla el paso "Checkout backend" — `continue-on-error` en el job oculta
-# esto en la vista de gh run list/checks (queda en verde), pero el log del
-# run muestra el error igual. Los pasos siguientes se saltan explícitamente
-# (`if:` de abajo) para que el run quede realmente limpio y el motivo sea
-# visible como aviso, en vez de un error de checkout críptico.
+# Si el secret falta (rotación fallida, fork), el job **falla** en vez de
+# saltarse los pasos en silencio: durante meses este check estuvo en verde
+# sin ejecutar una sola prueba porque el checkout del backend fallaba y
+# `continue-on-error` lo enmascaraba. Un check que no puede correr tiene que
+# decirlo en rojo, no aprobar por omisión.
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     services:
       postgres:
@@ -73,10 +74,11 @@ jobs:
       PORT: 3000
 
     steps:
-      - name: Avisar si falta BACKEND_REPO_SSH_KEY
+      - name: Fallar si falta BACKEND_REPO_SSH_KEY
         if: env.HAS_BACKEND_KEY != 'true'
         run: |
-          echo "::warning::Falta el secret BACKEND_REPO_SSH_KEY (Settings → Secrets and variables → Actions). Se omite la suite e2e completa — ver el comentario al inicio de este workflow."
+          echo "::error::Falta el secret BACKEND_REPO_SSH_KEY (Settings → Secrets and variables → Actions): sin él no se puede clonar el backend y la suite no corre. Ver el comentario al inicio de este workflow para reponerlo."
+          exit 1
 
       - name: Checkout frontend
         if: env.HAS_BACKEND_KEY == 'true'
