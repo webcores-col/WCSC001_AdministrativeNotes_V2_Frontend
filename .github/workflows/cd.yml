@@ -1,10 +1,11 @@
-# CD: cada push a main publica la imagen en GHCR y (si el despliegue está
-# habilitado) la despliega en el VPS compartido de COINTRAMIN vía SSH.
-# Mismo patrón que el backend (WCSC001_AdministrativeNotes_V2/.github/
-# workflows/cd.yml) — ver también docs/PLAN_ARQUITECTURA.md, Fase 12.
+# CD: cada push a main publica la imagen en GHCR, la despliega primero en
+# staging (VPS dedicado, ver WCS_Infra ADR-008) y solo si esa prueba real
+# sale bien, despliega en producción. Mismo patrón que el backend
+# (WCSC001_AdministrativeNotes_V2/.github/workflows/cd.yml) — ver también
+# docs/PLAN_ARQUITECTURA.md, Fase 12.
 #
 # Sin el setup de variables/secrets de abajo, el workflow igual publica la
-# imagen (GITHUB_TOKEN basta) y el job de deploy queda en "skipped".
+# imagen (GITHUB_TOKEN basta) y los jobs de deploy quedan en "skipped".
 name: CD
 
 on:
@@ -61,11 +62,61 @@ jobs:
             NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
             NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE=${{ vars.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE }}
 
+  staging:
+    name: Deploy VPS staging (SSH)
+    needs: build-push
+    # Se habilita creando la variable de repositorio STAGING_ENABLED=true
+    if: vars.STAGING_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ vars.STAGING_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sincronizar docker-compose.prod.yml al VPS de staging
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ vars.STAGING_HOST }}
+          username: deploy
+          key: ${{ secrets.STAGING_DEPLOY_SSH_KEY }}
+          source: docker-compose.prod.yml
+          target: /opt/apps/wcsc001-frontend
+          overwrite: true
+
+      - name: Pull + recrear el contenedor por SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ vars.STAGING_HOST }}
+          username: deploy
+          key: ${{ secrets.STAGING_DEPLOY_SSH_KEY }}
+          envs: IMAGE
+          script: |
+            set -e
+            cd /opt/apps/wcsc001-frontend
+            echo "FRONTEND_IMAGE=$IMAGE" > .env
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --wait --wait-timeout 150
+            docker image prune -f
+        env:
+          IMAGE: ${{ needs.build-push.outputs.image }}
+
+      - name: Smoke test /api/health
+        run: |
+          curl --fail --silent --show-error --retry 10 --retry-delay 3 --retry-all-errors \
+            "${{ vars.STAGING_URL }}/api/health"
+
   deploy:
     name: Deploy VPS COINTRAMIN (SSH)
-    needs: build-push
-    # Se habilita creando la variable de repositorio VPS_DEPLOY_ENABLED=true
-    if: vars.VPS_DEPLOY_ENABLED == 'true'
+    needs: [build-push, staging]
+    # Producción se despliega si está habilitada y el build salió bien, pero
+    # NUNCA si staging corrió y falló — `always()` evita que un `staging` en
+    # "skipped" (STAGING_ENABLED=false) haga que este job también se salte.
+    if: |
+      always() && vars.VPS_DEPLOY_ENABLED == 'true' &&
+      needs.build-push.result == 'success' &&
+      (needs.staging.result == 'success' || needs.staging.result == 'skipped')
     runs-on: ubuntu-latest
     environment:
       name: production
